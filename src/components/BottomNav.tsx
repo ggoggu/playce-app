@@ -1,22 +1,36 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { BOTTOM_NAV_LIST } from '../hooks/useMainPresenter';
+import { useRouter, usePathname } from 'expo-router'; // 🌟 페이지 이동 마법사들 불러오기
 
-export default function BottomNav({ activeTab, onSelectTab }: any) {
+// 🌟 탭 이름과 2단계에서 만든 주소(URL)를 짝지어 줍니다.
+const NAV_ITEMS = [
+  { name: '홈', path: '/' },
+  { name: '코스선택', path: '/course' },
+  { name: '이벤트', path: '/event' },
+  { name: '프로필', path: '/profile' },
+  { name: '환경설정', path: '/setting' },
+];
+
+export default function BottomNav() {
+  const router = useRouter(); // 페이지 이동을 담당
+  const pathname = usePathname(); // 현재 내가 있는 주소를 확인
+
   return (
     <View style={styles.bottomNavWrapper} pointerEvents="box-none">
       <View style={styles.bottomNavContainer}>
-        {BOTTOM_NAV_LIST.map((tab, index) => {
-          const isActive = activeTab === tab;
+        {NAV_ITEMS.map((tab, index) => {
+          // 🌟 내 현재 주소와 탭의 주소가 같으면 자동으로 불이 켜집니다!
+          const isActive = pathname === tab.path;
+          
           return (
             <TouchableOpacity 
               key={index} 
               style={styles.navItem}
-              onPress={() => onSelectTab(tab)}
+              onPress={() => router.push(tab.path as any)} // 🌟 터치하면 해당 주소로 순간이동!
             >
               <View style={[styles.navIconPlaceholder, isActive && { borderColor: '#FFB826' }]} />
               <Text style={[styles.navText, isActive && styles.navTextActive]}>
-                {tab}
+                {tab.name}
               </Text>
             </TouchableOpacity>
           );

@@ -2,8 +2,8 @@ import { Stack } from 'expo-router';
 
 export default function RootLayout() {
   return (
-    // headerShown: false 를 통해 불필요한 상단 헤더와 기본 UI를 모두 숨깁니다.
-    <Stack screenOptions={{ headerShown: false }}>
+    // 🌟 animation: 'none'을 추가해서 모든 화면 전환 애니메이션을 꺼버립니다!
+    <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
       <Stack.Screen name="index" />
     </Stack>
   );

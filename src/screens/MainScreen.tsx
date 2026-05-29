@@ -35,10 +35,7 @@ export default function MainScreen() {
           />
         </View>
 
-        <BottomNav 
-          activeTab={activeTab} 
-          onSelectTab={handleTabSelect} 
-        />
+        <BottomNav />
       </View>
     </SafeAreaView>
   );
