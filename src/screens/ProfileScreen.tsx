@@ -12,7 +12,7 @@ export default function ProfileScreen() {
         <Text style={styles.title}>내 프로필</Text>
         <Text style={styles.subTitle}>회원 정보 및 다이어리 기능을 준비 중입니다.</Text>
       </View>
-      <BottomNav />
+
     </SafeAreaView>
   );
 }

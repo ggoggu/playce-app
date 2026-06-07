@@ -26,7 +26,7 @@ export default function BottomNav() {
             <TouchableOpacity 
               key={index} 
               style={styles.navItem}
-              onPress={() => router.push(tab.path as any)} // 🌟 터치하면 해당 주소로 순간이동!
+              onPress={() => router.navigate(tab.path as any)} // 🌟 터치하면 해당 주소로 순간이동!
             >
               <View style={[styles.navIconPlaceholder, isActive && { borderColor: '#FFB826' }]} />
               <Text style={[styles.navText, isActive && styles.navTextActive]}>

@@ -12,7 +12,7 @@ export default function SettingScreen() {
         <Text style={styles.title}>환경 설정</Text>
         <Text style={styles.subTitle}>앱 알림 및 상세 설정을 준비 중입니다.</Text>
       </View>
-      <BottomNav />
+
     </SafeAreaView>
   );
 }

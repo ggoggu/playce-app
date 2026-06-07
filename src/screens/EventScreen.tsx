@@ -12,7 +12,7 @@ export default function EventScreen() {
         <Text style={styles.title}>이벤트</Text>
         <Text style={styles.subTitle}>진행 중인 특별한 혜택과 이벤트를 준비 중입니다.</Text>
       </View>
-      <BottomNav />
+
     </SafeAreaView>
   );
 }
