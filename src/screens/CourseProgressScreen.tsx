@@ -1,167 +1,299 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, ImageBackground } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  SafeAreaView, 
+  Image, 
+  StatusBar,
+  ImageBackground,
+  Dimensions
+} from 'react-native';
 import { useCourse } from '../context/CourseState';
-import { THEME_ASSETS } from '../config/ThemeAssets'; // 🌟 1단계에서 만든 보따리 불러오기
+import { THEME_ASSETS } from '../config/ThemeAssets';
+import BottomNav from '../components/BottomNav';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function CourseProgressScreen() {
-  // 🌟 activeTheme('history' 또는 'movie')을 가져옵니다.
-  const { activeTheme, cancelCourse } = useCourse();
-    
-  // 🌟 현재 활성화된 테마의 자원(텍스트, 이미지)을 통째로 꺼내옵니다.
-  // 혹시나 값이 비어있을 경우를 대비해 기본값으로 'history'를 지정합니다.
+  const { activeTheme } = useCourse();
   const currentTheme = THEME_ASSETS[activeTheme || 'history'];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        
-        {/* 1. 배경 그라데이션 (동적 매핑) */}
-        <Image 
-          source={currentTheme.bgGradient} 
-          style={styles.bgGradient} 
-        />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
 
-        {/* 2. 구불구불한 길 (동적 매핑) */}
-        <Image 
-          source={currentTheme.bgPath} 
-          style={styles.bgPath} 
-          resizeMode="contain"
-        />
+      {/* 1. 배경 그라데이션 (CSS: transform: matrix(-1, 0, 0, 1, 0, 0)) */}
+      <Image source={currentTheme.bgGradient} style={styles.bgGradient} resizeMode="cover" />
+      
+      {/* 2. 구불구불한 코스 길 (CSS: top: -32.07px) */}
+      <View style={styles.bgPathContainer} pointerEvents="none">
+        <Image source={currentTheme.bgPath} style={styles.bgPath} resizeMode="contain" />
+      </View>
 
-        {/* 3. 장식용 나무들 (동적 매핑) */}
-        <View style={styles.treeContainer} pointerEvents="none">
-          {/* 상단 나무 2개 */}
-          <View style={styles.treeTopGroup}>
-            <View style={{ alignItems: 'flex-start' }}>
-              <Image source={currentTheme.trees[0]} style={styles.tree1} />
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Image source={currentTheme.trees[1]} style={styles.tree2} />
-            </View>
-          </View>
-          {/* 하단 나무 2개 */}
-          <View style={styles.treeBottomGroup}>
-            <View style={{ alignItems: 'flex-start' }}>
-              <Image source={currentTheme.trees[2]} style={styles.tree3} />
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Image source={currentTheme.trees[3]} style={styles.tree4} />
-            </View>
-          </View>
+      {/* 3. 🌟 장식용 나무 4그루 (SVG 절대 좌표 반영) */}
+      {currentTheme.trees && currentTheme.trees.length >= 4 && (
+        <View style={styles.treesContainer} pointerEvents="none">
+          <Image source={currentTheme.trees[0]} style={[styles.tree, { top: 188.5, left: 37.3, width: 106.4, height: 91 }]} />
+          <Image source={currentTheme.trees[1]} style={[styles.tree, { top: 370.5, left: 285.6, width: 79, height: 109.8 }]} />
+          <Image source={currentTheme.trees[2]} style={[styles.tree, { top: 495.4, left: 37.5, width: 41.5, height: 88.3 }]} />
+          <Image source={currentTheme.trees[3]} style={[styles.tree, { top: 683.7, left: 270, width: 99.5, height: 155.1 }]} />
         </View>
+      )}
 
-        {/* 4. 헤더 영역 (PLAYCE + 햄버거) */}
+      {/* 4. 메인 컨텐츠 영역 */}
+      <View style={styles.mainContainer}>
+        
+        {/* 상단 로고 */}
         <View style={styles.header}>
           <Text style={styles.logoText}>PLAYCE</Text>
-
-          <TouchableOpacity onPress={cancelCourse} style={styles.cancelButton}>
-            <Text style={styles.cancelText}>코스 취소</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.hamburgerButton}>
-            <View style={styles.hamburgerLine} />
-            <View style={styles.hamburgerLine} />
-            <View style={styles.hamburgerLine} />
-          </TouchableOpacity>
         </View>
 
-        {/* 5. 메인 UI (타이틀, 진행률, 코스 노드) */}
-        <View style={styles.mainUIContainer} pointerEvents="box-none">
+        {/* 안내 문구 및 진행도 UI */}
+        <View style={styles.topSection}>
+          <Text style={styles.mainTitle}>
+            행궁체험사랑님은{'\n'}{currentTheme.themeTitle}로드를{'\n'}진행중입니다!
+          </Text>
           
-          {/* 타이틀 및 진행도 */}
-          <View style={styles.titleSection}>
-            <Text style={styles.mainTitle}>
-              <Text style={styles.highlightText}>행궁체험사랑</Text>님은{'\n'}
-              {/* 🌟 하드코딩되어 있던 텍스트를 선택된 테마 제목으로 변경 */}
-              <Text style={styles.highlightText}>{currentTheme.themeTitle}</Text>로드를 진행중입니다!
-            </Text>
-
-            <View style={styles.progressBox}>
-              <View style={styles.progressBar} />
-              <Text style={styles.progressText}>진행률 0%</Text>
+          <View style={styles.progressWrapper}>
+            <Text style={styles.progressLabel}>진행도</Text>
+            <View style={styles.progressRight}>
+              <View style={styles.progressBarBg}>
+                <View style={styles.progressBarFill} />
+              </View>
+              <Text style={styles.progressValue}>진행률 0%</Text>
             </View>
           </View>
+        </View>
 
-          {/* 6. 코스 노드 배치 영역 (동적 매핑) */}
-          <View style={styles.nodesContainer}>
-            {/* 상단 4, 5번 */}
-            <View style={styles.nodeRowTop}>
-              <CourseNode num={4} imageSource={currentTheme.nodes[4]} starBadge={currentTheme.starBadge} />
-              <CourseNode num={5} imageSource={currentTheme.nodes[5]} starBadge={currentTheme.starBadge} />
-            </View>
-
-            {/* 중간 3번 */}
-            <View style={styles.nodeRowCenter}>
-              <CourseNode num={3} imageSource={currentTheme.nodes[3]} starBadge={currentTheme.starBadge} />
-            </View>
-
-            {/* 하단 1, 2번 */}
-            <View style={styles.nodeRowBottom}>
-              <CourseNode num={1} imageSource={currentTheme.nodes[1]} starBadge={currentTheme.starBadge} />
-              <CourseNode num={2} imageSource={currentTheme.nodes[2]} starBadge={currentTheme.starBadge} />
-            </View>
+        {/* 5. 지그재그 코스 노드 배치 (CSS gap 및 정렬 반영) */}
+        <View style={styles.nodesContainer}>
+          {/* 상단: 노드 4(서북각루), 노드 5(화서문) */}
+          <View style={styles.nodeRowTop}>
+            <CourseNode num={4} image={currentTheme.nodes[4]} badge={currentTheme.starBadge} />
+            <CourseNode num={5} image={currentTheme.nodes[5]} badge={currentTheme.starBadge} />
           </View>
-
+          
+          {/* 중단: 노드 3(서장대) */}
+          <View style={styles.nodeRowCenter}>
+            <CourseNode num={3} image={currentTheme.nodes[3]} badge={currentTheme.starBadge} />
+          </View>
+          
+          {/* 하단: 노드 1(화성행궁), 노드 2(화령전) */}
+          <View style={styles.nodeRowBottom}>
+            <CourseNode num={1} image={currentTheme.nodes[1]} badge={currentTheme.starBadge} />
+            <CourseNode num={2} image={currentTheme.nodes[2]} badge={currentTheme.starBadge} />
+          </View>
         </View>
 
       </View>
+
+      {/* 하단 네비게이션 */}
+      <BottomNav />
     </SafeAreaView>
   );
 }
 
-// 🌟 개별 건물 아이콘 컴포넌트 (별 배지도 동적으로 받도록 수정)
-const CourseNode = ({ num, imageSource, starBadge }: { num: number, imageSource: any, starBadge: any }) => (
+// 🃏 개별 코스 노드 컴포넌트
+const CourseNode = ({ num, image, badge }: { num: number, image: any, badge: any }) => (
   <View style={styles.nodeWrapper}>
     <View style={styles.nodeOuterCircle}>
       <View style={styles.nodeInnerCircle}>
-        <Image source={imageSource} style={styles.nodeImage} resizeMode="contain" />
+        <Image source={image} style={styles.nodeImage} resizeMode="contain" />
       </View>
     </View>
-
-    {/* 별 모양 숫자 배지 동적 변경 */}
-    <ImageBackground 
-      source={starBadge} 
-      style={styles.starBadge}
-      resizeMode="contain"
-    >
-      <Text style={styles.starBadgeText}>{num}</Text>
+    
+    <ImageBackground source={badge} style={styles.nodeBadge}>
+      <Text style={styles.nodeBadgeText}>{num}</Text>
     </ImageBackground>
   </View>
 );
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#FFF9E6' },
-  container: { flex: 1, position: 'relative' },
-  bgGradient: { position: 'absolute', width: '100%', height: '100%', resizeMode: 'cover' },
-  bgPath: { position: 'absolute', width: 325, height: 707, top: 40, alignSelf: 'center' },
-  treeContainer: { position: 'absolute', top: 178, left: 22, right: 22, height: 670 },
-  treeTopGroup: { gap: 76, marginBottom: 80 },
-  treeBottomGroup: { gap: 80 },
-  tree1: { width: 106, height: 90, resizeMode: 'contain' },
-  tree2: { width: 79, height: 109, resizeMode: 'contain' },
-  tree3: { width: 41, height: 88, resizeMode: 'contain' },
-  tree4: { width: 99, height: 155, resizeMode: 'contain' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 38, paddingTop: 20, zIndex: 10 },
-  logoText: { fontSize: 20, fontWeight: '900', color: '#FFB826', textShadowColor: 'rgba(0,0,0,0.2)', textShadowRadius: 20 },
-  hamburgerButton: { width: 24, height: 24, justifyContent: 'space-evenly', alignItems: 'center' },
-  hamburgerLine: { width: 18, height: 2, backgroundColor: '#8A8A8A' },
-  mainUIContainer: { flex: 1, paddingHorizontal: 35, paddingTop: 20 },
-  titleSection: { marginBottom: 20 },
-  mainTitle: { fontSize: 24, fontWeight: '800', color: '#000000', lineHeight: 32, marginBottom: 10 },
-  highlightText: { color: '#1BC5CC' },
-  progressBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.6)', borderRadius: 20, paddingVertical: 8, paddingHorizontal: 12, width: 197, shadowColor: '#000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 2 },
-  progressBar: { width: 44, height: 12, borderRadius: 20 },
-  progressText: { fontSize: 10, fontWeight: '500', color: '#8A8A8A', marginLeft: 'auto' },
-  nodesContainer: { alignSelf: 'center', width: 257.17, height: 416.34, justifyContent: 'space-between', marginTop: 10 },
-  nodeRowTop: { flexDirection: 'row', justifyContent: 'center', gap: 65 },
-  nodeRowCenter: { flexDirection: 'row', justifyContent: 'center' },
-  nodeRowBottom: { flexDirection: 'row', justifyContent: 'center', gap: 59 },
-  nodeWrapper: { position: 'relative', width: 74.78, height: 74.78, justifyContent: 'center', alignItems: 'center' },
-  nodeOuterCircle: { width: 74.78, height: 74.78, backgroundColor: '#FBFBDD', borderRadius: 37.5, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 3 },
-  nodeInnerCircle: { width: 58.78, height: 58.78, backgroundColor: '#FFB826', borderRadius: 29.5, justifyContent: 'center', alignItems: 'center' },
-  nodeImage: { width: 50, height: 50 },
-  starBadge: { position: 'absolute', top: -8, left: -4, width: 32, height: 32, justifyContent: 'center', alignItems: 'center' },
-  starBadgeText: { fontFamily: 'Pretendard', fontWeight: '700', fontSize: 12, color: '#FFFFFF', marginTop: 2 },
-  cancelButton: { backgroundColor: '#8A8A8A', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 },
-  cancelText: { color: '#FFFFFF', fontWeight: '700', fontSize: 12 }
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#FFF9E6' 
+  },
+  
+  // 배경 
+  bgGradient: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    top: 0,
+    left: 0,
+    transform: [{ scaleX: -1 }], 
+  },
+  bgPathContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    top: -32, // CSS 시안 좌표
+  },
+  bgPath: {
+    width: 325.64,
+    height: 707.28,
+  },
+
+  // 나무 데코레이션 컨테이너
+  treesContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    top: 0,
+    left: 0,
+  },
+  tree: {
+    position: 'absolute',
+    resizeMode: 'contain',
+    opacity: 0.7, // SVG fill-opacity="0.7" 반영
+  },
+
+  mainContainer: {
+    flex: 1,
+    paddingHorizontal: 35,
+    zIndex: 1, // 배경 위에 확실히 뜨도록 처리
+  },
+  
+  header: {
+    marginTop: 50,
+  },
+  logoText: {
+    fontFamily: 'Rammetto One',
+    fontSize: 20,
+    color: '#FFB826',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
+  },
+
+  topSection: {
+    marginTop: 20,
+    gap: 10,
+  },
+  mainTitle: {
+    fontFamily: 'Pretendard',
+    fontWeight: '800',
+    fontSize: 24,
+    lineHeight: 32,
+    color: '#1BC5CC',
+  },
+  progressWrapper: {
+    width: 197.13,
+    height: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  progressLabel: {
+    fontFamily: 'Pretendard',
+    fontWeight: '600',
+    fontSize: 10,
+    color: '#8A8A8A',
+  },
+  progressRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  progressBarBg: {
+    width: 44,
+    height: 12,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    width: '0%', 
+    height: '100%',
+    backgroundColor: '#FFB826',
+  },
+  progressValue: {
+    fontFamily: 'Pretendard',
+    fontWeight: '500',
+    fontSize: 10,
+    lineHeight: 12,
+    color: '#8A8A8A',
+  },
+
+  // 코스 노드 배치
+  nodesContainer: {
+    alignSelf: 'center',
+    marginTop: 35,
+    width: 257.17,
+    height: 416.34,
+    justifyContent: 'space-between', 
+  },
+  nodeRowTop: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 65, 
+  },
+  nodeRowCenter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  nodeRowBottom: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 59, 
+  },
+
+  nodeWrapper: {
+    width: 74.78,
+    height: 74.78,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nodeOuterCircle: {
+    width: 74.78,
+    height: 74.78,
+    backgroundColor: '#FBFBDD',
+    borderRadius: 37.39,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  nodeInnerCircle: {
+    width: 58.78,
+    height: 58.78,
+    backgroundColor: '#FFB826',
+    borderRadius: 29.39,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nodeImage: {
+    width: 51.83,
+    height: 51.83,
+  },
+  nodeBadge: {
+    position: 'absolute',
+    top: -11.42, 
+    left: -3.22,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nodeBadgeText: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 12,
+    lineHeight: 14,
+    color: '#FFFFFF',
+    marginTop: 2, 
+  }
 });
