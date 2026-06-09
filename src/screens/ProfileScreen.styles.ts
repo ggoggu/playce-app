@@ -216,4 +216,53 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     color: '#8A8A8A',
   },
+
+  badgeSectionTitle: {
+    fontFamily: typography.main,
+    fontWeight: '500',
+    fontSize: 12,
+    color: colors.grayDark, // #8A8A8A
+    marginBottom: 21,
+    paddingLeft: 6,
+  },
+  badgeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap', // 공간이 꽉 차면 자동으로 다음 줄로 넘어감 (Grid 역할)
+    justifyContent: 'space-between',
+    paddingBottom: 100, // 하단 네비게이션 가림 방지 및 여유 스크롤 공간
+  },
+  badgeItem: {
+    width: '47%', // 2열 배치를 위해 약 50% 미만으로 설정 (나머지는 여백)
+    alignItems: 'center',
+    marginBottom: 26, // 아래쪽 배지와의 간격
+  },
+  badgeCircle: {
+    width: 165,  // 피그마 수치
+    height: 165,
+    borderRadius: 82.5, // 완벽한 원형
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  // 획득 여부에 따른 동적 배경색 및 그림자
+  badgeCircleActive: { 
+    backgroundColor: colors.white,
+    ...shadows.light, // 1단계에서 만든 가벼운 그림자 적용
+  },
+  badgeCircleInactive: { 
+    backgroundColor: colors.grayDark, // #8A8A8A
+  },
+  badgeName: {
+    fontFamily: typography.main,
+    fontWeight: '600',
+    fontSize: 12,
+    color: '#4C4C4C', // 디자인에 명시된 어두운 회색
+    textAlign: 'center',
+  },
+  badgeEmptyText: {
+    fontFamily: typography.main,
+    fontWeight: '600',
+    fontSize: 12,
+    color: colors.white,
+  },
 });

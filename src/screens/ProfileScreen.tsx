@@ -12,7 +12,9 @@ import { styles } from './ProfileScreen.styles';
 export default function ProfileScreen() {
   // 🌟 View에서는 훅에서 던져주는 데이터와 함수만 받아서 씁니다.
   const { 
-    userInfo, 
+    userInfo,
+    badges,               // 🌟 배지 데이터 배열
+    acquiredBadgeCount, 
     handleEditProfile, 
     handleScanQR, 
     handleDeleteTag,
@@ -98,25 +100,35 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.statSection}>
-            <View style={styles.statHeaderRow}>
-              <View style={styles.statTag}>
-                <Text style={styles.statTagText}>탐험 시간</Text>
-              </View>
-              <Text style={styles.statSubText}>
-                {userInfo.nickname}님의 현재까지의 체류시간이에요
-              </Text>
-              <Text style={styles.timeValueText}>{userInfo.playTimeMinutes}분</Text>
+            <Text style={styles.badgeSectionTitle}>
+              활동 배지 ({acquiredBadgeCount}개)
+            </Text>
+            
+            <View style={styles.badgeGrid}>
+              {badges.map((badge) => (
+                <View key={badge.id} style={styles.badgeItem}>
+                  
+                  {/* 동적 스타일 적용: 획득 여부에 따라 원형 배경과 그림자가 바뀜 */}
+                  <View style={[
+                    styles.badgeCircle,
+                    badge.isAcquired ? styles.badgeCircleActive : styles.badgeCircleInactive
+                  ]}>
+                    {badge.isAcquired ? (
+                      // 🌟 획득한 배지: 추후 에셋 이미지가 준비되면 Image 컴포넌트 주석 해제 후 사용
+                      // <Image source={require(`../../assets/images/badges/${badge.id}.png`)} style={{ width: 52, height: 52 }} resizeMode="contain" />
+                      <Text style={{ fontSize: 40 }}>🏅</Text> // 임시 이모지
+                    ) : (
+                      // 미획득 상태
+                      <Text style={styles.badgeEmptyText}>미획득</Text>
+                    )}
+                  </View>
+                  
+                  <Text style={styles.badgeName}>{badge.name}</Text>
+                </View>
+              ))}
             </View>
           </View>
-
-          <View style={styles.statSection}>
-             {/* 다음 단계에서 배지 Grid가 들어갈 자리입니다. */}
-          </View>
           
-
-          <View style={{ height: 500, alignItems: 'center' }}>
-            <Text style={{ color: '#4C4C4C' }}>여기에 탐험 스탯과 배지 목록이 채워집니다.</Text>
-          </View>
 
         </BottomSheetScrollView>
       </BottomSheet>

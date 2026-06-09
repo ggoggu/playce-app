@@ -1,13 +1,16 @@
+// src/app/_layout.tsx
 import { Tabs } from 'expo-router';
-import BottomNav from '../components/BottomNav'; // 🌟 하단 바 불러오기
+import { GestureHandlerRootView } from 'react-native-gesture-handler'; // 🌟 추가된 부분
+import BottomNav from '../components/BottomNav'; 
 
 export default function RootLayout() {
   return (
-    // 🌟 Stack 대신 Tabs를 사용합니다!
-    // tabBar 속성에 우리가 만든 BottomNav를 넣어주면, 앱 전체에 딱 1번만 고정됩니다.
-    <Tabs 
-      screenOptions={{ headerShown: false }}
-      tabBar={() => <BottomNav />} 
-    />
+    // 🌟 앱 전체를 GestureHandlerRootView로 감싸고, 반드시 flex: 1을 주어야 화면이 보입니다!
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Tabs 
+        screenOptions={{ headerShown: false }}
+        tabBar={() => <BottomNav />} 
+      />
+    </GestureHandlerRootView>
   );
 }
