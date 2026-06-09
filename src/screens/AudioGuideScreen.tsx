@@ -2,92 +2,94 @@
 import React from 'react';
 import { View, Text, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { useCourse } from '../context/CourseState';
+import { COURSE_DATA } from '../constants/CourseData'; // 🌟 1단계 메타데이터
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import AudioPlayerSheet from '../components/AudioPlayerSheet';
 import CourseCompletePopup from '../components/CourseCompletePopup';
 import { styles } from './AudioGuideScreen.styles';
 
 export default function AudioGuideScreen() {
   const router = useRouter();
-  const { completeNode } = useCourse();
   
-  // 🌟 오디오 제어 훅 연결: assets 폴더의 1.mp3 파일 로드
+  // 🌟 전역 상태 꺼내오기
+  const { activeTheme, currentNodeIndex, completedNodes, completeNode } = useCourse();
+
+  // 현재 테마와, 현재 진입한 특정 노드(장소)의 데이터를 찾습니다.
+  const currentThemeData = activeTheme ? COURSE_DATA[activeTheme] : COURSE_DATA['history'];
+  const currentNodeData = currentThemeData.nodes.find(node => node.id === currentNodeIndex) || currentThemeData.nodes[0];
+
+  // 🌟 동적 오디오 로드 (하드코딩 제거!)
   const { 
     isPlaying, isFinished, positionStr, durationStr, progressRatio, togglePlayPause 
-  } = useAudioPlayer(require('../../assets/audio/history/1.mp3'));
+  } = useAudioPlayer(currentNodeData.audioSource);
 
+  const isAlreadyCompleted = completedNodes.includes(currentNodeData.id);
+  const nextCompletedCount = isAlreadyCompleted ? completedNodes.length : completedNodes.length + 1;
+
+const isThemeMastered = nextCompletedCount >= currentThemeData.totalNodes;
+
+  // 마저 관광하기 버튼 클릭 시
   const handleContinue = () => {
-    completeNode(1); // 전역 상태에 1번 코스 완료 기록 (이걸로 이전 화면의 노드가 파랗게 변함)
-    router.back();   // 오디오 화면을 닫고 이전 화면(코스 진행 UI)으로 돌아감
+    if (currentNodeIndex) {
+      completeNode(currentNodeIndex); // 현재 노드 번호를 완료 처리
+    }
+    if (isThemeMastered) {
+      // TODO: 나중에 '테마 완료 축하 화면'이나 '최종 보상 화면'을 만들면 여기 주소를 바꾸세요!
+      console.log("🎉 테마 올 클리어! 보상 화면으로 이동합니다.");
+      router.replace('/course-progress' as any); 
+    } else {
+      // 아직 남은 코스가 있다면 평소처럼 지도 화면으로 돌아갑니다.
+      router.replace('/course-progress' as any); 
+    } 
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* 1. 앱 전체 배경 : bg_audio_history.png */}
-      <Image 
-        source={require('../../assets/images/course_history/bg_audio_history.png')} 
-        style={styles.bgImage} 
-      />
+      <Image source={require('../../assets/images/course_history/bg_audio_history.png')} style={styles.bgImage} />
 
-      {/* 2. 상단 헤더 영역 */}
       <View style={styles.headerContainer}>
-  <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
-    <Text style={{ fontSize: 24, color: '#8A8A8A' }}>←</Text>
-  </TouchableOpacity>
-  <Text style={styles.headerTitle}>역사테마여정의 첫번째 코스는 화성행궁입니다!</Text>
-</View>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+          <Text style={{ fontSize: 24, color: '#8A8A8A' }}>←</Text>
+        </TouchableOpacity>
+        {/* 🌟 동적 테마명과 장소명 렌더링 */}
+        <Text style={styles.headerTitle}>{currentThemeData.themeTitle}의 코스는 {currentNodeData.placeName}입니다!</Text>
+      </View>
 
-      {/* 3. 중앙 일러스트 뷰 */}
       <View style={styles.illustrationContainer}>
-        {/* 배경 : bg_illust_haenggung.png */}
-        <Image 
-          source={require('../../assets/images/course_history/bg_illust_haenggung.png')} 
-          style={styles.illustBg} 
-          resizeMode="contain" 
-        />
+        {/* 🌟 동적 이미지 렌더링 (데이터 모델에서 가져옴) */}
+        <Image source={currentNodeData.images.bg} style={styles.illustBg} resizeMode="contain" />
+        <Image source={require('../../assets/images/course_history/deco_cloud_1.png')} style={styles.cloud1} resizeMode="contain" />
+        <Image source={require('../../assets/images/course_history/deco_cloud_2.png')} style={styles.cloud2} resizeMode="contain" />
+        <Image source={currentNodeData.images.building} style={styles.mainIllust} resizeMode="contain" />
         
-        {/* 구름 : deco_cloud_1.png, deco_cloud_2.png */}
-        <Image 
-          source={require('../../assets/images/course_history/deco_cloud_1.png')} 
-          style={styles.cloud1} 
-          resizeMode="contain" 
-        />
-        <Image 
-          source={require('../../assets/images/course_history/deco_cloud_2.png')} 
-          style={styles.cloud2} 
-          resizeMode="contain" 
-        />
-        
-        {/* 화성행궁 (메인 건축물) : building_haenggung.png */}
-        <Image 
-          source={require('../../assets/images/course_history/building_haenggung.png')} 
-          style={styles.mainIllust} 
-          resizeMode="contain" 
-        />
-        
-        {/* 제목 박스 (코드로 직접 구현) */}
         <View style={styles.titleBox}>
-          <Text style={styles.titleBoxText}>화성행궁</Text>
+          {/* 🌟 동적 장소명 렌더링 */}
+          <Text style={styles.titleBoxText}>{currentNodeData.placeName}</Text>
         </View>
       </View>
 
-      {/* 4. 하단 오디오 플레이어 시트 연결 */}
+      {/* 🌟 업데이트된 하단 시트 컴포넌트에 동적 데이터 주입 */}
       <AudioPlayerSheet 
+        totalNodes={currentThemeData.totalNodes}
+        currentNodeIndex={currentNodeData.id}
+        completedNodes={completedNodes}
         isPlaying={isPlaying}
-        isFinished={isFinished} // 🌟 오디오가 완료되면 시트 내부의 1번 노드가 파란색으로 변함!
+        isFinished={isFinished}
         positionStr={positionStr}
         durationStr={durationStr}
         progressRatio={progressRatio}
         onTogglePlay={togglePlayPause}
+        placeName={currentNodeData.placeName}
       />
 
       <CourseCompletePopup 
-        visible={isFinished} // 오디오가 끝나면 자동으로 true가 되어 팝업 등장!
+        visible={isFinished} 
+        // 🌟 올 클리어 여부에 따라 팝업 문구를 아주 똑똑하게 변경합니다!
+        titleText={isThemeMastered ? "모든 코스를\n모두 둘러보았어요!" : `${currentNodeData.id}번째 코스를\n모두 둘러보았어요`}
         onContinue={handleContinue} 
-        onGoToBadgeBox={() => console.log("배지함 이동 로직 추후 추가")}
+        onGoToBadgeBox={() => console.log("배지함 이동")}
       />
-      
     </SafeAreaView>
   );
 }

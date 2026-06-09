@@ -1,32 +1,33 @@
 // src/context/CourseState.ts
 import { useState, useEffect } from 'react';
+import { COURSE_DATA, CourseThemeType } from '../constants/CourseData'; // 🌟 1단계에서 만든 데이터와 타입 임포트
 
-// 1. 테마 타입 정의
-export type CourseTheme = 'history' | 'movie' | null;
+export type CourseTheme = CourseThemeType | null;
 
-// 2. 앱이 켜져 있는 동안 절대 초기화되지 않는 전역 상태
+// 앱 전체에서 공유할 글로벌 변수 (진실의 원천)
 let globalActiveTheme: CourseTheme = null;
-let globalRFIDPlace: string | null = null; // 🌟 추가: 인식된 장소 이름 (null이면 팝업이 닫힌 상태)
-let globalCompletedNodes: number[] = [];
+let globalRFIDPlace: string | null = null;
+let globalCompletedNodes: number[] = []; 
+let globalCurrentNodeIndex: number | null = null; // 🌟 추가: 현재 사용자가 진입한 오디오 코스 번호
 
 const listeners = new Set<() => void>();
 
-// 상태가 바뀔 때마다 모든 화면에 알려주는 도우미 함수 (중복 제거용)
 const notifyListeners = () => {
   listeners.forEach(listener => listener());
 };
 
 export const useCourse = () => {
   const [activeTheme, setActiveTheme] = useState<CourseTheme>(globalActiveTheme);
-  const [rfidPlace, setRfidPlace] = useState<string | null>(globalRFIDPlace); // 🌟 추가: RFID 상태 동기화
+  const [rfidPlace, setRfidPlace] = useState<string | null>(globalRFIDPlace);
   const [completedNodes, setCompletedNodes] = useState<number[]>(globalCompletedNodes);
+  const [currentNodeIndex, setCurrentNodeIndex] = useState<number | null>(globalCurrentNodeIndex); // 🌟 추가
 
-  // 화면이 바뀔 때마다 최신 상태를 동기화
   useEffect(() => {
     const listener = () => {
       setActiveTheme(globalActiveTheme);
-      setRfidPlace(globalRFIDPlace); // 🌟 추가
+      setRfidPlace(globalRFIDPlace);
       setCompletedNodes([...globalCompletedNodes]);
+      setCurrentNodeIndex(globalCurrentNodeIndex); // 🌟 추가
     };
     listeners.add(listener);
     return () => {
@@ -34,20 +35,42 @@ export const useCourse = () => {
     };
   }, []);
 
-  // 테마 정보를 받아 코스를 시작
+  // 코스 여정 시작
   const startCourse = (theme: Exclude<CourseTheme, null>) => {
     globalActiveTheme = theme;
+    globalCompletedNodes = []; 
+    globalCurrentNodeIndex = null;
     notifyListeners();
   };
 
-  // 코스 취소
+  // 코스 여정 완전히 취소 (초기화)
   const cancelCourse = () => {
     globalActiveTheme = null;
-    globalRFIDPlace = null; // 🌟 추가: 코스를 종료하면 RFID 팝업 상태도 안전하게 초기화
+    globalRFIDPlace = null;
     globalCompletedNodes = [];
+    globalCurrentNodeIndex = null;
     notifyListeners();
   };
 
+  // RFID 태그 인식되었을 때
+  const triggerRFID = (placeName: string) => {
+    globalRFIDPlace = placeName;
+    notifyListeners();
+  };
+
+  // RFID 팝업 닫기
+  const closeRFID = () => {
+    globalRFIDPlace = null;
+    notifyListeners();
+  };
+
+  // 🌟 추가: 현재 재생/진입할 노드 번호를 전역에 설정하는 함수
+  const setCurrentNode = (nodeIndex: number | null) => {
+    globalCurrentNodeIndex = nodeIndex;
+    notifyListeners();
+  };
+
+  // 특정 코스 완료 처리
   const completeNode = (nodeIndex: number) => {
     if (!globalCompletedNodes.includes(nodeIndex)) {
       globalCompletedNodes.push(nodeIndex);
@@ -55,35 +78,26 @@ export const useCourse = () => {
     }
   };
 
-  // ==========================================
-  // 🌟 새롭게 추가된 RFID 비즈니스 로직
-  // ==========================================
-
-  // 특정 장소의 RFID 태그가 인식되었을 때 호출 (예: triggerRFID('화성행궁'))
-  const triggerRFID = (placeName: string) => {
-    globalRFIDPlace = placeName;
-    notifyListeners();
-  };
-
-  // RFID 팝업을 닫을 때 호출
-  const closeRFID = () => {
-    globalRFIDPlace = null;
-    notifyListeners();
-  };
+  // 🌟 [핵심 변경] 선택한 테마의 실제 totalNodes를 기반으로 진행률(%)을 동적 계산합니다.
+  const currentThemeData = activeTheme ? COURSE_DATA[activeTheme] : null;
+  const totalNodes = currentThemeData ? currentThemeData.totalNodes : 1; // 0 나누기 방지 기본값 1
+  const progressPercent = currentThemeData 
+    ? Math.round((completedNodes.length / totalNodes) * 100) 
+    : 0;
 
   return { 
     isCourseActive: activeTheme !== null,
     activeTheme,
-    
-    // 🌟 RFID 관련 반환값들
-    rfidPlace,                             // 인식된 장소의 이름 (ex: '화성행궁')
-    isRFIDDetected: globalRFIDPlace !== null, // 팝업을 띄워야 하는지 여부 (boolean)
+    rfidPlace,
+    isRFIDDetected: globalRFIDPlace !== null,
     completedNodes,
-    triggerRFID,                           // 태그 인식 트리거 함수
-    closeRFID,                             // 팝업 닫기 함수
-
+    currentNodeIndex, // 🌟 현재 보고 있는 노드 번호 반환
+    progressPercent,  // 🌟 가변형으로 계산된 진행률(%) 반환
+    triggerRFID,
+    closeRFID,
     startCourse, 
     cancelCourse,
+    setCurrentNode,   // 🌟 노드 설정 함수 반환
     completeNode
   };
 };

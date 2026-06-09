@@ -167,5 +167,66 @@ export const styles = StyleSheet.create({
     lineHeight: 14,
     color: colors.white,
     marginTop: 2, 
+  },
+  progressContainer: {
+    padding: 10,
+  },
+  progressBarWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: 185,
+    height: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 20,
+    paddingHorizontal: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  /*
+  progressBarFill: {
+    height: 20,
+    backgroundColor: '#1BC5CC',
+    borderRadius: 20,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+  },
+  */
+  progressText: {
+    fontFamily: 'Pretendard',
+    fontWeight: '500',
+    fontSize: 10,
+    color: '#8A8A8A',
+    marginLeft: 'auto', // 텍스트를 오른쪽 끝으로 밀어줌
+    zIndex: 1, // 파란 막대 위로 글씨가 보이도록 설정
+  },
+  courseNodeWrapper: {
+    position: 'absolute',
+    width: 74,
+    height: 74,
+    backgroundColor: '#FBFBDD',
+    borderRadius: 37,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  courseNodeCircle: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nodeNumberText: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 12,
+    color: '#FFFFFF',
   }
 });

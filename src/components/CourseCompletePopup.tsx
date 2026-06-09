@@ -5,26 +5,33 @@ import { styles } from './CourseCompletePopup.styles';
 
 interface CourseCompletePopupProps {
   visible: boolean;
-  onContinue: () => void; // 마저 관광하기 눌렀을 때
-  onGoToBadgeBox?: () => void; // 배지함으로 이동하기 눌렀을 때
+  titleText: string; // 🌟 외부에서 팝업 제목을 주입받도록 추가
+  onContinue: () => void;
+  onGoToBadgeBox?: () => void;
 }
 
-export default function CourseCompletePopup({ visible, onContinue, onGoToBadgeBox }: CourseCompletePopupProps) {
+export default function CourseCompletePopup({ 
+  visible, 
+  titleText, // 🌟 프롭스 받기
+  onContinue, 
+  onGoToBadgeBox 
+}: CourseCompletePopupProps) {
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
       <View style={styles.overlay}>
         <View style={styles.popupContainer}>
           
           <View style={styles.topSection}>
-            <Text style={styles.mainTitle}>첫번째 코스를{'\n'}모두 둘러보았어요</Text>
+            {/* 🌟 하드코딩 지우고 동적 텍스트 적용 */}
+            <Text style={styles.mainTitle}>{titleText}</Text>
             
             <View style={styles.badgeSection}>
               <View style={styles.badgeCircle}>
                 <Image 
-      source={require('../../assets/images/course_history/badge_history_1.png')} 
-      style={styles.badgeImage} 
-      resizeMode="contain" 
-    />
+                  source={require('../../assets/images/course_history/badge_history_1.png')} 
+                  style={styles.badgeImage} 
+                  resizeMode="contain" 
+                />
               </View>
               <Text style={styles.badgeTitle}>배지를 받았어요!</Text>
             </View>
