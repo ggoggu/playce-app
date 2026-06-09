@@ -46,5 +46,21 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 5,
+  },
+
+  baseButton: {
+    paddingVertical: 12,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  roundTag: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 40,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });

@@ -31,6 +31,13 @@ export const shadows = {
     shadowRadius: 10,
     elevation: 3, // Android 전용
   } as ViewStyle,
+  card: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 4,
+  },
   
   // 버튼 그림자 (시작하기 버튼 등) - blur: 20, opacity: 10%
   button: {
