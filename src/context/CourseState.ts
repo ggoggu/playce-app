@@ -7,6 +7,7 @@ export type CourseTheme = 'history' | 'movie' | null;
 // 2. 앱이 켜져 있는 동안 절대 초기화되지 않는 전역 상태
 let globalActiveTheme: CourseTheme = null;
 let globalRFIDPlace: string | null = null; // 🌟 추가: 인식된 장소 이름 (null이면 팝업이 닫힌 상태)
+let globalCompletedNodes: number[] = [];
 
 const listeners = new Set<() => void>();
 
@@ -18,12 +19,14 @@ const notifyListeners = () => {
 export const useCourse = () => {
   const [activeTheme, setActiveTheme] = useState<CourseTheme>(globalActiveTheme);
   const [rfidPlace, setRfidPlace] = useState<string | null>(globalRFIDPlace); // 🌟 추가: RFID 상태 동기화
+  const [completedNodes, setCompletedNodes] = useState<number[]>(globalCompletedNodes);
 
   // 화면이 바뀔 때마다 최신 상태를 동기화
   useEffect(() => {
     const listener = () => {
       setActiveTheme(globalActiveTheme);
       setRfidPlace(globalRFIDPlace); // 🌟 추가
+      setCompletedNodes([...globalCompletedNodes]);
     };
     listeners.add(listener);
     return () => {
@@ -41,7 +44,15 @@ export const useCourse = () => {
   const cancelCourse = () => {
     globalActiveTheme = null;
     globalRFIDPlace = null; // 🌟 추가: 코스를 종료하면 RFID 팝업 상태도 안전하게 초기화
+    globalCompletedNodes = [];
     notifyListeners();
+  };
+
+  const completeNode = (nodeIndex: number) => {
+    if (!globalCompletedNodes.includes(nodeIndex)) {
+      globalCompletedNodes.push(nodeIndex);
+      notifyListeners();
+    }
   };
 
   // ==========================================
@@ -67,10 +78,12 @@ export const useCourse = () => {
     // 🌟 RFID 관련 반환값들
     rfidPlace,                             // 인식된 장소의 이름 (ex: '화성행궁')
     isRFIDDetected: globalRFIDPlace !== null, // 팝업을 띄워야 하는지 여부 (boolean)
+    completedNodes,
     triggerRFID,                           // 태그 인식 트리거 함수
     closeRFID,                             // 팝업 닫기 함수
 
     startCourse, 
-    cancelCourse 
+    cancelCourse,
+    completeNode
   };
 };

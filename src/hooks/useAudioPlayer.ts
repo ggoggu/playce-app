@@ -1,43 +1,23 @@
 // src/hooks/useAudioPlayer.ts
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Audio } from 'expo-av';
+import { useFocusEffect } from 'expo-router'; // 🌟 라우터 포커스 훅 추가
 
 export function useAudioPlayer(audioSource: any) {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isFinished, setIsFinished] = useState(false); // 🌟 오디오 재생 완료 상태
-  const [position, setPosition] = useState(0);         // 현재 재생 시간 (밀리초)
-  const [duration, setDuration] = useState(0);         // 전체 길이 (밀리초)
+  const [isFinished, setIsFinished] = useState(false);
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  
+  const soundRef = useRef<Audio.Sound | null>(null);
 
-  // 1. 컴포넌트가 켜질 때 오디오 파일을 로드합니다.
-  useEffect(() => {
-    async function loadAudio() {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        audioSource,
-        { shouldPlay: false },
-        onPlaybackStatusUpdate
-      );
-      setSound(newSound);
-    }
-
-    loadAudio();
-
-    // 컴포넌트가 꺼질 때 메모리 누수 방지를 위해 오디오를 해제합니다.
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [audioSource]);
-
-  // 2. 오디오 재생 상태가 변할 때마다 실행되는 추적 함수
   const onPlaybackStatusUpdate = (status: any) => {
     if (status.isLoaded) {
       setPosition(status.positionMillis);
       setDuration(status.durationMillis || 0);
       setIsPlaying(status.isPlaying);
 
-      // 🌟 핵심: 오디오가 끝까지 재생되었는지 감지!
       if (status.didJustFinish) {
         setIsFinished(true);
         setIsPlaying(false);
@@ -45,14 +25,65 @@ export function useAudioPlayer(audioSource: any) {
     }
   };
 
-  // 3. 재생 / 일시정지 토글 함수
+  // 🌟 핵심: 화면에 들어올 때 실행되고, 나갈 때 클린업(초기화)됩니다.
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      async function loadAudio() {
+        try {
+          // 아이폰 무음 모드에서도 소리가 나도록 안전장치 추가
+          await Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+            shouldDuckAndroid: true,
+          });
+
+          const { sound: newSound } = await Audio.Sound.createAsync(
+            audioSource,
+            { shouldPlay: false },
+            onPlaybackStatusUpdate
+          );
+
+          if (isMounted) {
+            setSound(newSound);
+            soundRef.current = newSound;
+          } else {
+            // 이미 화면을 나갔다면 로드된 즉시 버림
+            newSound.unloadAsync();
+          }
+        } catch (error) {
+          console.log("Audio load error:", error);
+        }
+      }
+
+      loadAudio();
+
+      // 👇 화면에서 나갈 때(뒤로 가기 등) 자동으로 실행되는 해제 로직
+      return () => {
+        isMounted = false;
+        if (soundRef.current) {
+          // 재생 중이던 소리를 멈추고 메모리에서 완전히 날림
+          soundRef.current.stopAsync().then(() => {
+            soundRef.current?.unloadAsync();
+          }).catch(e => console.log(e));
+        }
+        
+        // 모든 상태를 처음으로 되돌림
+        setSound(null);
+        soundRef.current = null;
+        setIsPlaying(false);
+        setIsFinished(false);
+        setPosition(0);
+      };
+    }, [audioSource])
+  );
+
   const togglePlayPause = async () => {
     if (!sound) return;
-
     if (isPlaying) {
       await sound.pauseAsync();
     } else {
-      // 끝까지 다 들은 상태에서 다시 재생을 누르면 처음부터 다시 시작
       if (isFinished) {
         await sound.replayAsync();
         setIsFinished(false); 
@@ -62,7 +93,6 @@ export function useAudioPlayer(audioSource: any) {
     }
   };
 
-  // 4. 밀리초(ms)를 0:00 (분:초) 형태의 문자열로 예쁘게 바꿔주는 도우미 함수
   const formatTime = (millis: number) => {
     const totalSeconds = Math.floor(millis / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -73,9 +103,10 @@ export function useAudioPlayer(audioSource: any) {
   return {
     isPlaying,
     isFinished,
-    positionStr: formatTime(position), // 예: "0:34"
-    durationStr: formatTime(duration), // 예: "8:34"
-    progressRatio: duration > 0 ? position / duration : 0, // 진행률 (0 ~ 1)
+    positionStr: formatTime(position),
+    durationStr: formatTime(duration),
+    progressRatio: duration > 0 ? position / duration : 0,
     togglePlayPause,
+    // 🌟 수동 stopAudio는 화면 나갈 때 자동 처리되므로 더 이상 필요 없습니다.
   };
 }

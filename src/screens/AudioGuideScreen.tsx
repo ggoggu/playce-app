@@ -3,16 +3,24 @@ import React from 'react';
 import { View, Text, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { useCourse } from '../context/CourseState';
 import AudioPlayerSheet from '../components/AudioPlayerSheet';
+import CourseCompletePopup from '../components/CourseCompletePopup';
 import { styles } from './AudioGuideScreen.styles';
 
 export default function AudioGuideScreen() {
   const router = useRouter();
+  const { completeNode } = useCourse();
   
   // 🌟 오디오 제어 훅 연결: assets 폴더의 1.mp3 파일 로드
   const { 
     isPlaying, isFinished, positionStr, durationStr, progressRatio, togglePlayPause 
   } = useAudioPlayer(require('../../assets/audio/history/1.mp3'));
+
+  const handleContinue = () => {
+    completeNode(1); // 전역 상태에 1번 코스 완료 기록 (이걸로 이전 화면의 노드가 파랗게 변함)
+    router.back();   // 오디오 화면을 닫고 이전 화면(코스 진행 UI)으로 돌아감
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -24,11 +32,11 @@ export default function AudioGuideScreen() {
 
       {/* 2. 상단 헤더 영역 */}
       <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
-          <Text style={{ fontSize: 24, color: '#8A8A8A' }}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>역사테마여정의 첫번째 코스는 화성행궁입니다!</Text>
-      </View>
+  <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+    <Text style={{ fontSize: 24, color: '#8A8A8A' }}>←</Text>
+  </TouchableOpacity>
+  <Text style={styles.headerTitle}>역사테마여정의 첫번째 코스는 화성행궁입니다!</Text>
+</View>
 
       {/* 3. 중앙 일러스트 뷰 */}
       <View style={styles.illustrationContainer}>
@@ -73,6 +81,13 @@ export default function AudioGuideScreen() {
         progressRatio={progressRatio}
         onTogglePlay={togglePlayPause}
       />
+
+      <CourseCompletePopup 
+        visible={isFinished} // 오디오가 끝나면 자동으로 true가 되어 팝업 등장!
+        onContinue={handleContinue} 
+        onGoToBadgeBox={() => console.log("배지함 이동 로직 추후 추가")}
+      />
+      
     </SafeAreaView>
   );
 }

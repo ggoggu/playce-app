@@ -16,7 +16,7 @@ export default function CourseProgressScreen() {
 
   const handleStartAudio = () => {
     closeRFID(); // 1. 팝업을 먼저 닫고
-    router.push('/audio-guide' as any ); // 2. 오디오 가이드 화면으로 부드럽게 이동!
+    router.push('/audio-guide' as any ); // 2. 오디오 가이드 화면으g로 부드럽게 이동!
   };
 
   return (

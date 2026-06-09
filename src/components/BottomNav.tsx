@@ -15,6 +15,10 @@ export default function BottomNav() {
   const router = useRouter(); // 페이지 이동을 담당
   const pathname = usePathname(); // 현재 내가 있는 주소를 확인
 
+  if (pathname === '/audio-guide') {
+    return null;
+  }
+
   return (
     <View style={styles.bottomNavWrapper} pointerEvents="box-none">
       <View style={styles.bottomNavContainer}>
