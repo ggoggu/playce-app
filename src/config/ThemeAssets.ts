@@ -20,6 +20,7 @@ export const THEME_ASSETS = {
       5: require('../../assets/images/course_history/node_5_hwaseomun.png'),
     },
     starBadge: require('../../assets/images/course_history/icon_star_badge.png'),
+    rfidPopupImage: require('../../assets/images/course_history/popup_illust_rfid_haenggung.png'),
   },
 
   // 2. 영화 & 드라마 테마 데이터
@@ -44,5 +45,6 @@ export const THEME_ASSETS = {
       5: require('../../assets/images/course_history/node_5_hwaseomun.png'),
     },
     starBadge: require('../../assets/images/course_history/icon_star_badge.png'),
+    rfidPopupImage: require('../../assets/images/course_history/popup_illust_rfid_haenggung.png'),
   }
 };

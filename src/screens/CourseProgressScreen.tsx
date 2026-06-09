@@ -3,11 +3,21 @@ import { View, Text, SafeAreaView, Image, ImageBackground } from 'react-native';
 import { useCourse } from '../context/CourseState';
 import { THEME_ASSETS } from '../config/ThemeAssets';
 import BottomNav from '../components/BottomNav';
+import RFIDPopup from '../components/RFID/RFIDPopup';
+import { TouchableOpacity } from 'react-native';
 import { styles } from './CourseProgressScreen.styles'; // 🌟 분리한 스타일 불러오기
+import { useRouter } from 'expo-router';
 
 export default function CourseProgressScreen() {
-  const { activeTheme } = useCourse();
+  const router = useRouter();
+  const { activeTheme, isRFIDDetected, rfidPlace, closeRFID } = useCourse();
+  const { triggerRFID } = useCourse();
   const currentTheme = THEME_ASSETS[activeTheme || 'history'];
+
+  const handleStartAudio = () => {
+    closeRFID(); // 1. 팝업을 먼저 닫고
+    router.push('/audio-guide' as any ); // 2. 오디오 가이드 화면으로 부드럽게 이동!
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -63,6 +73,23 @@ export default function CourseProgressScreen() {
       </View>
 
       <BottomNav />
+
+      <RFIDPopup 
+        visible={isRFIDDetected} 
+        onClose={closeRFID} 
+        onStartAudio={handleStartAudio} 
+        placeName={rfidPlace || '장소'} // null 방지
+        imageSource={currentTheme.rfidPopupImage} // ThemeAssets에 등록한 이미지 연결
+      />
+
+      <TouchableOpacity 
+        style={{ padding: 10, backgroundColor: 'red', marginTop: 20 }}
+        onPress={() => triggerRFID('화성행궁')} // 👈 버튼을 누르면 태그가 인식된 것처럼 작동!
+        >
+        <Text style={{ color: 'white' }}>[테스트] 화성행궁 태그 인식하기</Text>
+    </TouchableOpacity>
+     
+
     </SafeAreaView>
   );
 }
