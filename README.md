@@ -1,3 +1,8 @@
+# 모바일로 테스트 하는법
+1. Expo GO 설치
+2. playce-app 폴더에서 터미널을 연후, npx expo start -c 명령서 실행
+3.  Metro waiting on exp://112.159.64.97:8081 , QR 스캔하던가, Enter URL 을 통해 왼쪽의 URL exp://112.159.64.97:8081 와 같은 형태의 URL을 직접 입력
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
