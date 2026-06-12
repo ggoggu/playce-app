@@ -1,56 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, Text, Image, ActivityIndicator } from 'react-native';
+import { CourseNode } from '../constants/CourseData';
+import { useCourseDirections } from '../hooks/useCourseDirections'; 
+import { colors } from '../styles/theme';
+import { styles } from './MapArea.styles'; // 🌟 분리된 스타일 임포트
 
-export default function MapArea({ location, errorMsg, filteredPlaces }: any) {
-  // 🌟 핵심 1: 지도 스크립트가 다 다운로드되었는지 기억하는 상태값
+interface MapAreaProps {
+  location: any;
+  errorMsg: string | null;
+  filteredPlaces?: any[];
+  courseNodes?: CourseNode[]; 
+  onMarkerPress?: (node: CourseNode) => void; 
+}
+
+export default function MapArea({ location, errorMsg, filteredPlaces = [], courseNodes = [], onMarkerPress }: MapAreaProps) {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [mapInstance, setMapInstance] = useState<any>(null); 
+  
+  const { routeCoordinates, isRouteLoading } = useCourseDirections(courseNodes);
 
-  // ==========================================
-  // [1단계] 네이버 지도 스크립트 '다운로드'만 전담
-  // ==========================================
   useEffect(() => {
+    // 네이버 맵 스크립트 로드 로직 (이전과 동일)
     const scriptId = 'naver-map-script';
     let script = document.getElementById(scriptId) as HTMLScriptElement;
 
     if (!script) {
       script = document.createElement('script');
       script.id = scriptId;
-      // 🚨 아래 글자를 지우고 실제 Client ID를 꼭 넣어주세요!
       script.src = "https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=a5r7ydgths";
       script.async = true;
       document.head.appendChild(script);
-
-      // 다운로드가 '완료'되면 상태를 true로 변경
-      script.onload = () => {
-        setIsMapLoaded(true);
-      };
+      script.onload = () => setIsMapLoaded(true);
     } else {
-      // 이미 다운로드되어 있다면 바로 true로 변경 (새로고침 대비)
       setIsMapLoaded(true);
     }
-  }, []); // 빈 배열([])을 넣어 컴포넌트가 처음 켜질 때 딱 한 번만 실행되게 합니다.
+  }, []);
 
-  // ==========================================
-  // [2단계] 다운로드 완료 확인 후 '지도 그리기' 전담
-  // ==========================================
   useEffect(() => {
-    // 스크립트가 안 받아졌거나, 네이버 객체가 준비 안 됐으면 그리지 않고 대기!
     if (!isMapLoaded) return;
     const naver = (window as any).naver;
     if (!naver || !naver.maps) return;
 
-    // 위치 정보 가져오기 (권한 대기 중이면 수원 화성을 기본값으로)
-    const lat = location ? location.coords.latitude : 37.288;
-    const lng = location ? location.coords.longitude : 127.019;
+    const lat = courseNodes.length > 0 ? courseNodes[0].lat : (location ? location.coords.latitude : 37.288);
+    const lng = courseNodes.length > 0 ? courseNodes[0].lng : (location ? location.coords.longitude : 127.019);
 
-    const mapOptions = {
+    const map = new naver.maps.Map('web-map', {
       center: new naver.maps.LatLng(lat, lng),
       zoom: 15
-    };
-    
-    const map = new naver.maps.Map('web-map', mapOptions);
-    
-    // 필터링된 마커 데이터 뿌려주기
+    });
+    setMapInstance(map);
+
     filteredPlaces.forEach((place: any) => {
       new naver.maps.Marker({
         position: new naver.maps.LatLng(place.lat, place.lng),
@@ -59,10 +58,39 @@ export default function MapArea({ location, errorMsg, filteredPlaces }: any) {
       });
     });
 
-  // 🌟 핵심 2: 스크립트 완료 상태(isMapLoaded)나, 내 위치(location)가 업데이트될 때만 안전하게 재실행됩니다.
-  }, [isMapLoaded, location, filteredPlaces]); 
+    courseNodes.forEach((node: CourseNode) => {
+      const imageUri = Image.resolveAssetSource(node.images.building).uri;
+      const marker = new naver.maps.Marker({
+        position: new naver.maps.LatLng(node.lat, node.lng),
+        map: map,
+        icon: { url: imageUri, scaledSize: new naver.maps.Size(60, 60) }
+      });
 
-  // 위치 권한 거부 시 메시지 표시
+      if (onMarkerPress) {
+        naver.maps.Event.addListener(marker, 'click', () => onMarkerPress(node));
+      }
+    });
+  }, [isMapLoaded, location, filteredPlaces, courseNodes]); 
+
+  useEffect(() => {
+    const naver = (window as any).naver;
+    if (!mapInstance || !naver || routeCoordinates.length === 0) return;
+
+    const polylinePath = routeCoordinates.map(coord => new naver.maps.LatLng(coord.latitude, coord.longitude));
+    
+    const polyline = new naver.maps.Polyline({
+      map: mapInstance,
+      path: polylinePath,
+      strokeColor: colors.point,
+      strokeWeight: 5,
+      strokeStyle: 'shortdash'
+    });
+
+    return () => {
+      polyline.setMap(null);
+    };
+  }, [mapInstance, routeCoordinates]);
+
   if (!location && errorMsg) {
     return (
       <View style={styles.loadingContainer}>
@@ -74,24 +102,12 @@ export default function MapArea({ location, errorMsg, filteredPlaces }: any) {
   return (
     <View style={styles.container}>
       <div id="web-map" style={{ width: '100%', height: '100%' }} />
+      {isRouteLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.loadingText}>경로 탐색 중...</Text>
+        </View>
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: '100%',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#EAEAEA',
-  },
-  loadingText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
-  }
-});
