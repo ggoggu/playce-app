@@ -5,6 +5,7 @@ import BottomSheet from '@gorhom/bottom-sheet';
 // 🌟 1. 전역 상태 및 데이터 불러오기
 import { useCourse } from '../context/CourseState';
 import { COURSE_DATA } from '../constants/CourseData'; 
+import { useRouter } from 'expo-router';
 
 export interface Badge {
   id: number | string;
@@ -16,6 +17,7 @@ export interface Badge {
 export function useProfile() {
   // 🌟 2. CourseState에서 실제 유저의 탐험 기록 가져오기
   const { completedNodes, progressPercent } = useCourse();
+  const router = useRouter();
 
   // 기본 유저 정보 상태 (닉네임 등은 추후 로그인 API 연동 시 업데이트)
   const [userInfo, setUserInfo] = useState({
@@ -57,7 +59,7 @@ export function useProfile() {
   };
 
   const handleScanQR = () => {
-    console.log("QR 스캔 카메라 실행");
+    router.push('/qr-scan' as any);
   };
 
   const handleDeleteTag = () => {

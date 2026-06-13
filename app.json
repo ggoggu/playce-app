@@ -36,6 +36,12 @@
             "imageWidth": 76
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "QR 코드를 스캔하여 태그를 연동하기 위해 카메라 접근 권한이 필요합니다."
+        }
       ]
     ],
     "experiments": {
