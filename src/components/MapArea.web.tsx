@@ -24,10 +24,12 @@ export default function MapArea({ location, errorMsg, filteredPlaces = [], cours
     const scriptId = 'naver-map-script';
     let script = document.getElementById(scriptId) as HTMLScriptElement;
 
+    const clientId = process.env.EXPO_PUBLIC_NAVER_MAP_CLIENT_ID;
+
     if (!script) {
       script = document.createElement('script');
       script.id = scriptId;
-      script.src = "https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=a5r7ydgths";
+      script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
       script.async = true;
       document.head.appendChild(script);
       script.onload = () => setIsMapLoaded(true);

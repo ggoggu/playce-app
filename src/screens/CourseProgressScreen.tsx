@@ -119,12 +119,25 @@ export default function CourseProgressScreen() {
         imageSource={currentTheme.rfidPopupImage} 
       />
 
-      {/* 테스트용 RFID 버튼 */}
+      {/* 테스트용 RFID 버튼 (자동 다음 코스 찾기) */}
       <TouchableOpacity 
-        style={{ padding: 10, backgroundColor: 'red', marginTop: 20, zIndex: 10 }}
-        onPress={() => triggerRFID('화성행궁')} 
+        style={{ padding: 15, backgroundColor: '#FFB826', marginHorizontal: 20, marginBottom: 20, borderRadius: 12, zIndex: 10, alignItems: 'center' }}
+        onPress={() => {
+          // 1. 현재 테마의 전체 노드 중에서, '완료된 노드 배열'에 없는 첫 번째 노드를 찾습니다.
+          const nextNode = currentThemeData.nodes.find(node => !completedNodes.includes(node.id));
+          
+          if (nextNode) {
+            // 2. 다음 노드가 있다면 해당 장소 이름으로 RFID 인식을 트리거합니다.
+            triggerRFID(nextNode.placeName);
+          } else {
+            // 3. 모든 코스를 돌았다면 알림을 띄웁니다.
+            alert('🎉 모든 코스 탐험을 완료했습니다!');
+          }
+        }} 
       >
-        <Text style={{ color: 'white' }}>[테스트] 화성행궁 태그 인식하기</Text>
+        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+          [테스트] 다음 코스 태그 인식하기
+        </Text>
       </TouchableOpacity>
      
     </SafeAreaView>
