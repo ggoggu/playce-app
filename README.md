@@ -2,6 +2,7 @@
 1. Expo GO 설치
 2. playce-app 폴더에서 터미널을 연후, npx expo start -c 명령서 실행
 3.  Metro waiting on exp://112.159.64.97:8081 , QR 스캔하던가, Enter URL 을 통해 왼쪽의 URL exp://112.159.64.97:8081 와 같은 형태의 URL을 직접 입력
+4. web 사용시, playce-app 폴더에, .env 생성후 키값 입력; EXPO_PUBLIC_NAVER_MAP_CLIENT_ID=여기에_새로운_키값_입력
 
 # Welcome to your Expo app 👋
 
