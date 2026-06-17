@@ -20,6 +20,7 @@ export default function CourseProgressScreen() {
     progressPercent,
     triggerRFID,
     openCourseSelection,
+    setCurrentNode,
   } = useCourse();
 
   const currentTheme = THEME_ASSETS[activeTheme || 'history'];
@@ -68,9 +69,8 @@ export default function CourseProgressScreen() {
               isCurrent={isCurrent}
               position={node.mapPosition}
               onPress={() => {
-                if (isCurrent) {
-                  triggerRFID();
-                }
+                setCurrentNode(node.id); // 클릭한 노드를 현재 활성화된 노드로 설정
+                triggerRFID();
               }}
             />
           );
@@ -144,8 +144,8 @@ const CourseNode = ({
   <TouchableOpacity
     style={[styles.nodeWrapper, { position: 'absolute', left: position.left, top: position.top }]}
     onPress={onPress}
-    activeOpacity={isCurrent ? 0.88 : 1}
-    disabled={!isCurrent}
+    activeOpacity={isCurrent ? 0.88 : 0.7}
+    disabled={isCompleted}
   >
     <View style={styles.nodeOuterCircle}>
       <View style={[styles.nodeInnerCircle, { backgroundColor: isCompleted ? '#1BC5CC' : '#FFB826' }]}>
