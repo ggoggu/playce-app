@@ -1,18 +1,17 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 
 // 🌟 데이터 및 상태 관리 훅 불러오기
-import { useMainPresenter } from '../hooks/useMainPresenter';
-import { useLocation } from '../hooks/useLocation';
-import { useCourse } from '../context/CourseState';
-import { useMapInteraction } from '../hooks/useMapInteraction';
 import { COURSE_DATA } from '../constants/CourseData';
+import { useCourse } from '../context/CourseState';
+import { useLocation } from '../hooks/useLocation';
+import { useMainPresenter } from '../hooks/useMainPresenter';
+import { useMapInteraction } from '../hooks/useMapInteraction';
 
 // 🌟 UI 컴포넌트 불러오기
-import Header from '../components/Header';
 import CategoryFilter from '../components/CategoryFilter';
-import BottomNav from '../components/BottomNav';
-import MapArea from '../components/MapArea'; 
+import Header from '../components/Header';
+import MapArea from '../components/MapArea';
 import PlaceInfoCard from '../components/PlaceInfoCard'; // 새로 만든 카드 컴포넌트
 
 export default function MainScreen() {
@@ -60,8 +59,7 @@ export default function MainScreen() {
         onClose={handleCloseCard} 
       />
 
-      {/* 4. 하단 네비게이션 바 */}
-      <BottomNav />
+      
     </View>
   );
 }

@@ -1,13 +1,12 @@
 // src/screens/CourseProgressScreen.tsx
-import React from 'react';
-import { View, Text, SafeAreaView, Image, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useCourse } from '../context/CourseState';
-import { COURSE_DATA } from '../constants/CourseData'; // 🌟 1단계에서 만든 메타데이터
-import { THEME_ASSETS } from '../config/ThemeAssets';  // 기존 에셋 파일
-import BottomNav from '../components/BottomNav';
+import React from 'react';
+import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import RFIDPopup from '../components/RFID/RFIDPopup';
-import { styles } from './CourseProgressScreen.styles'; 
+import { THEME_ASSETS } from '../config/ThemeAssets'; // 기존 에셋 파일
+import { COURSE_DATA } from '../constants/CourseData'; // 🌟 1단계에서 만든 메타데이터
+import { useCourse } from '../context/CourseState';
+import { styles } from './CourseProgressScreen.styles';
 
 export default function CourseProgressScreen() {
   const router = useRouter();
@@ -112,8 +111,6 @@ export default function CourseProgressScreen() {
         
         {/* 기존에 하드코딩되었던 nodesContainer는 삭제 (절대 좌표 렌더링으로 대체) */}
       </View>
-
-      <BottomNav />
 
       <RFIDPopup 
         visible={isRFIDDetected} 

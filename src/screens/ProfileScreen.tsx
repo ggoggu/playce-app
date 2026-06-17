@@ -1,4 +1,5 @@
 // src/screens/ProfileScreen.tsx
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import React, { useState } from 'react';
 import {
   Image,
@@ -12,11 +13,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import BottomNav from '../components/BottomNav';
 import ProfileSheetBackground from '../components/profile/ProfileSheetBackground';
-import { useProfile } from '../hooks/useProfile';
 import type { Badge } from '../hooks/useProfile';
+import { useProfile } from '../hooks/useProfile';
 import { styles } from './ProfileScreen.styles';
 
 export default function ProfileScreen() {
@@ -160,9 +159,7 @@ export default function ProfileScreen() {
         </BottomSheet>
       )}
 
-      <View style={{ position: 'absolute', bottom: 0, width: '100%', zIndex: 20 }}>
-        <BottomNav />
-      </View>
+      
 
       <BadgeDetailModal badge={selectedBadge} onClose={() => setSelectedBadge(null)} />
       <ProfileEditModal

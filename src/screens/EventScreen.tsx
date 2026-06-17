@@ -1,16 +1,15 @@
 // src/screens/EventScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, StyleSheet, Modal } from 'react-native';
+import { Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // import { LinearGradient } from 'expo-linear-gradient'; // (실제 환경에서는 주석 해제)
-import { styles } from './EventScreen.styles';
-import { colors } from '../styles/theme';
-import BottomNav from '../components/BottomNav';
-import { HamburgerIcon, PaletteIcon, TicketIcon, StoreIcon, CrownIcon } from '../components/icons/EventIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { CrownIcon, HamburgerIcon, PaletteIcon, StoreIcon, TicketIcon } from '../components/icons/EventIcons';
+import { colors } from '../styles/theme';
+import { styles } from './EventScreen.styles';
 
 // 🌟 3단계에서 만든 비즈니스 로직 훅 불러오기
-import { useEventLogic, EventCategory, EventData } from '../hooks/useEventLogic';
+import { EventCategory, EventData, useEventLogic } from '../hooks/useEventLogic';
 
 // --- 재사용 UI 컴포넌트 ---
 
@@ -158,7 +157,6 @@ export default function EventScreen() {
         <Text style={styles.achievementText}>내 업적</Text>
       </TouchableOpacity>
 
-      <BottomNav />
       <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </SafeAreaView>
   );

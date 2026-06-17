@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { Image, ImageBackground, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import CoursePopup from '../components/CoursePopup';
 import { useCourse } from '../context/CourseState';
 import CourseProgressScreen from './CourseProgressScreen';
-import BottomNav from '../components/BottomNav';
-import CoursePopup from '../components/CoursePopup';
 import { styles } from './CourseScreen.styles'; // 🌟 분리한 스타일 불러오기
 
 const CARD_WIDTH = 294;
@@ -114,8 +113,6 @@ export default function CourseScreen() {
           />
         </ScrollView>
       </View>
-
-      <BottomNav />
 
       <CoursePopup
         visible={isPopupVisible}
