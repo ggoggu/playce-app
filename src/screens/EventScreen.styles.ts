@@ -1,6 +1,6 @@
 // src/screens/EventScreen.styles.ts
 import { StyleSheet, Dimensions } from 'react-native';
-import { colors, typography } from '../styles/theme';
+import { colors, createShadowStyle, typography } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -158,11 +158,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 19,
     borderRadius: 50,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    ...createShadowStyle(0, 4, 8, 0.1, 4),
     gap: 10,
   },
   achievementText: {

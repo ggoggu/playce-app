@@ -1,15 +1,16 @@
 // src/screens/EventScreen.tsx
-import React from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image, StyleSheet, Modal } from 'react-native';
 // import { LinearGradient } from 'expo-linear-gradient'; // (실제 환경에서는 주석 해제)
 import { styles } from './EventScreen.styles';
 import { colors } from '../styles/theme';
 import BottomNav from '../components/BottomNav';
 import { HamburgerIcon, PaletteIcon, TicketIcon, StoreIcon, CrownIcon } from '../components/icons/EventIcons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 
 // 🌟 3단계에서 만든 비즈니스 로직 훅 불러오기
-import { useEventLogic, EventCategory } from '../hooks/useEventLogic';
+import { useEventLogic, EventCategory, EventData } from '../hooks/useEventLogic';
 
 // --- 재사용 UI 컴포넌트 ---
 
@@ -33,8 +34,8 @@ const CategoryBadge = ({
 };
 
 // 2. 정방형 이벤트 카드 (이런곳도 가보고 싶어요!)
-const SquareEventCard = ({ title, subTitle, status, location, image }: any) => (
-  <TouchableOpacity style={styles.squareCard} activeOpacity={0.9}>
+const SquareEventCard = ({ title, subTitle, status, location, image, onPress }: any) => (
+  <TouchableOpacity style={styles.squareCard} activeOpacity={0.9} onPress={onPress}>
     <Image source={image} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
     <LinearGradient
       colors={['transparent', 'rgba(0,0,0,0.7)']} // 🌟 위는 투명, 아래는 어둡게
@@ -49,8 +50,8 @@ const SquareEventCard = ({ title, subTitle, status, location, image }: any) => (
 );
 
 // 3. 포스터 이벤트 카드 (여기가 제일 핫하대요!)
-const PosterEventCard = ({ title, subTitle, status, location, image }: any) => (
-  <TouchableOpacity style={styles.posterCard} activeOpacity={0.9}>
+const PosterEventCard = ({ title, subTitle, status, location, image, onPress }: any) => (
+  <TouchableOpacity style={styles.posterCard} activeOpacity={0.9} onPress={onPress}>
     <Image source={image} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
     <LinearGradient
       colors={['transparent', 'rgba(0,0,0,0.8)']} // 🌟 위는 투명, 아래는 어둡게
@@ -74,6 +75,8 @@ const CATEGORY_TABS: { label: EventCategory; icon: any }[] = [
 
 // --- 메인 화면 컨테이너 ---
 export default function EventScreen() {
+  const router = useRouter();
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   // 🌟 분리된 로직과 데이터 가져오기
   const {
     selectedCategory,
@@ -122,6 +125,7 @@ export default function EventScreen() {
               status={event.status}
               location={event.location}
               image={event.image}
+              onPress={() => setSelectedEvent(event)}
             />
           ))}
         </ScrollView>
@@ -141,6 +145,7 @@ export default function EventScreen() {
               status={event.status}
               location={event.location}
               image={event.image}
+              onPress={() => setSelectedEvent(event)}
             />
           ))}
         </ScrollView>
@@ -148,12 +153,175 @@ export default function EventScreen() {
       </ScrollView>
 
       {/* 내 업적 플로팅 버튼 */}
-      <TouchableOpacity style={styles.achievementButton} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.achievementButton} activeOpacity={0.8} onPress={() => router.push('/profile' as any)}>
         <CrownIcon color={colors.white} size={24} />
         <Text style={styles.achievementText}>내 업적</Text>
       </TouchableOpacity>
 
       <BottomNav />
+      <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </SafeAreaView>
   );
 }
+
+const EventDetailModal = ({ event, onClose }: { event: EventData | null; onClose: () => void }) => {
+  if (!event) return null;
+  const details = event.details;
+
+  return (
+    <Modal visible={Boolean(event)} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={detailStyles.backdrop}>
+        <View style={detailStyles.sheet}>
+          <Image source={event.image} style={detailStyles.heroImage} resizeMode="cover" />
+          <View style={detailStyles.statusTag}><Text style={detailStyles.statusText}>{event.status}</Text></View>
+          <Text style={detailStyles.location}>{event.location}</Text>
+          <Text style={detailStyles.title}>{event.title}</Text>
+          <Text style={detailStyles.subtitle}>{event.subTitle}</Text>
+          {details && (
+            <>
+              <View style={detailStyles.tagRow}>
+                {[...details.moodTags, ...details.companionTags].map((tag) => (
+                  <Text key={tag} style={detailStyles.tag}>{tag}</Text>
+                ))}
+              </View>
+              <Text style={detailStyles.previewTitle}>{details.previewTitle}</Text>
+              <Text style={detailStyles.previewDesc}>{details.previewDesc}</Text>
+              <View style={detailStyles.infoGrid}>
+                <View style={detailStyles.infoCell}>
+                  <Text style={detailStyles.infoLabel}>기간</Text>
+                  <Text style={detailStyles.infoValue}>{details.period}</Text>
+                </View>
+                <View style={detailStyles.infoCell}>
+                  <Text style={detailStyles.infoLabel}>가격</Text>
+                  <Text style={detailStyles.infoValue}>{details.price}</Text>
+                </View>
+              </View>
+            </>
+          )}
+          <TouchableOpacity style={detailStyles.closeButton} onPress={onClose} activeOpacity={0.85}>
+            <Text style={detailStyles.closeText}>돌아가기</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const detailStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.72)',
+    justifyContent: 'center',
+    paddingHorizontal: 22,
+  },
+  sheet: {
+    borderRadius: 24,
+    backgroundColor: '#191919',
+    overflow: 'hidden',
+    paddingBottom: 18,
+  },
+  heroImage: {
+    width: '100%',
+    height: 225,
+  },
+  statusTag: {
+    alignSelf: 'flex-start',
+    marginTop: 18,
+    marginLeft: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: '#1BC5CC',
+  },
+  statusText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  location: {
+    color: '#1BC5CC',
+    fontSize: 12,
+    fontWeight: '800',
+    marginHorizontal: 18,
+    marginTop: 12,
+  },
+  title: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '900',
+    marginHorizontal: 18,
+    marginTop: 4,
+  },
+  subtitle: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 13,
+    marginHorizontal: 18,
+    marginTop: 4,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginHorizontal: 18,
+    marginTop: 18,
+  },
+  tag: {
+    color: '#1BC5CC',
+    backgroundColor: 'rgba(27,197,204,0.14)',
+    borderRadius: 12,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  previewTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '900',
+    lineHeight: 22,
+    marginHorizontal: 18,
+    marginTop: 18,
+  },
+  previewDesc: {
+    color: 'rgba(255,255,255,0.76)',
+    fontSize: 12,
+    lineHeight: 18,
+    marginHorizontal: 18,
+    marginTop: 8,
+  },
+  infoGrid: {
+    marginHorizontal: 18,
+    marginTop: 16,
+    gap: 8,
+  },
+  infoCell: {
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    padding: 12,
+  },
+  infoLabel: {
+    color: '#1BC5CC',
+    fontSize: 11,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  infoValue: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  closeButton: {
+    marginHorizontal: 18,
+    marginTop: 18,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#FFB826',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
+  },
+});

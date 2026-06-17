@@ -1,143 +1,413 @@
 // src/screens/ProfileScreen.tsx
-import React from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Image,
+  Modal,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import BottomNav from '../components/BottomNav'; // 🌟 기존 하단바
+import BottomNav from '../components/BottomNav';
 import ProfileSheetBackground from '../components/profile/ProfileSheetBackground';
-
-
 import { useProfile } from '../hooks/useProfile';
+import type { Badge } from '../hooks/useProfile';
 import { styles } from './ProfileScreen.styles';
 
 export default function ProfileScreen() {
-  // 🌟 View에서는 훅에서 던져주는 데이터와 함수만 받아서 씁니다.
-  const { 
+  const {
     userInfo,
-    badges,               // 🌟 배지 데이터 배열
-    acquiredBadgeCount, 
-    handleEditProfile, 
-    handleScanQR, 
+    badges,
+    acquiredBadgeCount,
+    handleEditProfile,
+    handleScanQR,
     handleDeleteTag,
     bottomSheetRef,
-    snapPoints
+    snapPoints,
   } = useProfile();
+  const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const [editVisible, setEditVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState(userInfo.nickname);
+
+  const openEditProfile = () => {
+    setNicknameInput(userInfo.nickname);
+    setEditVisible(true);
+  };
+
+  const saveProfile = () => {
+    handleEditProfile(nicknameInput);
+    setEditVisible(false);
+  };
+
+  const confirmDeleteTag = () => {
+    handleDeleteTag();
+    setDeleteVisible(false);
+  };
+
+  const sheetContent = (
+    <>
+      <Text style={styles.sheetTitle}>탐험 스탯</Text>
+
+      <View style={styles.statSection}>
+        <View style={styles.statHeaderRow}>
+          <View style={styles.statTag}>
+            <Text style={styles.statTagText}>탐험 달성률</Text>
+          </View>
+          <Text style={styles.statSubText}>현재 {userInfo.nickname}님의 코스 진행률이에요</Text>
+        </View>
+
+        <View style={styles.progressBarBg}>
+          <View style={[styles.progressBarFill, { width: `${userInfo.progressRate}%` }]} />
+          <Text style={styles.progressText}>진행률 {userInfo.progressRate}%</Text>
+        </View>
+      </View>
+
+      <View style={styles.statSection}>
+        <Text style={styles.badgeSectionTitle}>활동 배지 ({acquiredBadgeCount}개)</Text>
+
+        <View style={styles.badgeGrid}>
+          {badges.map((badge) => (
+            <TouchableOpacity key={badge.id} style={styles.badgeItem} onPress={() => setSelectedBadge(badge)} activeOpacity={0.86}>
+              <View style={[styles.badgeCircle, badge.isAcquired ? styles.badgeCircleActive : styles.badgeCircleInactive]}>
+                {badge.image ? (
+                  <Image
+                    source={badge.image}
+                    style={[profileModalStyles.badgeImage, !badge.isAcquired && profileModalStyles.lockedBadgeImage]}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <Text style={styles.badgeEmptyText}>미획득</Text>
+                )}
+              </View>
+
+              <Text style={styles.badgeName}>{badge.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      {/* --- 상단 고정 영역 --- */}
       <View style={styles.topSection}>
-        
-        {/* 아바타 & 닉네임 */}
         <View style={styles.avatarCircle}>
-          <Text style={styles.avatarIcon}>👤</Text>
+          <Image source={require('../../assets/images/onboarding/mascot.png')} style={profileModalStyles.avatarImage} resizeMode="contain" />
         </View>
         <Text style={styles.nickname}>{userInfo.nickname}</Text>
-        
-        <TouchableOpacity style={styles.editProfileBtn} onPress={handleEditProfile} activeOpacity={0.7}>
+
+        <TouchableOpacity style={styles.editProfileBtn} onPress={openEditProfile} activeOpacity={0.7}>
           <Text style={styles.editProfileText}>내 정보 수정</Text>
         </TouchableOpacity>
 
-        {/* 태그 관리 카드 */}
         <View style={styles.tagCard}>
           <View style={styles.tagCardHeader}>
             <Text style={styles.tagCardTitle}>태그관리</Text>
-            
-            {/* 연결 상태 표시 */}
+
             <View style={styles.tagStatusRow}>
               <View style={styles.tagStatusBox}>
                 <Text style={styles.tagStatusText}>태그 연결</Text>
               </View>
-              {userInfo.isTagConnected && (
-                <Text style={styles.tagConnectedText}>연결</Text>
-              )}
+              {userInfo.isTagConnected && <Text style={styles.tagConnectedText}>연결</Text>}
+              {!userInfo.isTagConnected && <Text style={styles.tagPendingText}>{userInfo.registrationStatus}</Text>}
             </View>
           </View>
 
-          {/* 스캔 및 삭제 버튼 */}
+          <Text style={styles.tagMetaText}>
+            {userInfo.epc ? `EPC ${userInfo.epc}` : `App ${userInfo.appInstanceId || '초기화 중'}`}
+          </Text>
+          {userInfo.registrationError && (
+            <Text style={styles.tagErrorText} numberOfLines={2}>
+              {userInfo.registrationError}
+            </Text>
+          )}
+
           <TouchableOpacity style={styles.qrButton} onPress={handleScanQR} activeOpacity={0.8}>
             <Text style={styles.qrButtonText}>QR 스캔하기</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteTag} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => setDeleteVisible(true)} activeOpacity={0.8}>
             <Text style={styles.deleteButtonText}>태그 삭제</Text>
           </TouchableOpacity>
         </View>
       </View>
-      
-      {/* 🌟 3단계에서 이 아래에 드래그 바텀 시트가 추가될 예정입니다. */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={0} // 처음 화면 진입 시 snapPoints의 첫 번째('45%') 위치에 멈춤
-        snapPoints={snapPoints}
-        handleIndicatorStyle={styles.sheetIndicator} // 상단 둥근 손잡이
-        backgroundComponent={ProfileSheetBackground} // 그라데이션 배경 적용
-        style={styles.sheetContainer}
-      >
-        {/* 시트 내부가 길어지면 드래그와 스크롤이 자연스럽게 연동되는 스크롤 뷰 */}
-        <BottomSheetScrollView 
-          contentContainerStyle={styles.sheetContentContainer}
-          showsVerticalScrollIndicator={false}
+
+      {Platform.OS === 'web' ? (
+        <View style={[styles.sheetContainer, styles.webSheet]}>
+          <View style={styles.sheetIndicator} />
+          <ScrollView contentContainerStyle={styles.sheetContentContainer} showsVerticalScrollIndicator={false}>
+            {sheetContent}
+          </ScrollView>
+        </View>
+      ) : (
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={0}
+          snapPoints={snapPoints}
+          handleIndicatorStyle={styles.sheetIndicator}
+          backgroundComponent={ProfileSheetBackground}
+          style={styles.sheetContainer}
         >
-          {/* 피그마의 '프로필' 타이틀 텍스트 (위 화살표 아이콘 영역) */}
-          <Text style={styles.sheetTitle}>탐험 스탯</Text>
-          
-          <View style={styles.statSection}>
-            <View style={styles.statHeaderRow}>
-              <View style={styles.statTag}>
-                <Text style={styles.statTagText}>탐험 달성률</Text>
-              </View>
-              <Text style={styles.statSubText}>
-                현재 {userInfo.nickname}님의 코스 진행률이에요
-              </Text>
-            </View>
-            
-            {/* 진행률 바 */}
-            <View style={styles.progressBarBg}>
-              <View style={[styles.progressBarFill, { width: `${userInfo.progressRate}%` }]} />
-              <Text style={styles.progressText}>진행률 {userInfo.progressRate}%</Text>
-            </View>
-          </View>
+          <BottomSheetScrollView contentContainerStyle={styles.sheetContentContainer} showsVerticalScrollIndicator={false}>
+            {sheetContent}
+          </BottomSheetScrollView>
+        </BottomSheet>
+      )}
 
-          <View style={styles.statSection}>
-            <Text style={styles.badgeSectionTitle}>
-              활동 배지 ({acquiredBadgeCount}개)
-            </Text>
-            
-            <View style={styles.badgeGrid}>
-              {badges.map((badge) => (
-                <View key={badge.id} style={styles.badgeItem}>
-                  
-                  {/* 동적 스타일 적용: 획득 여부에 따라 원형 배경과 그림자가 바뀜 */}
-                  <View style={[
-                    styles.badgeCircle,
-                    badge.isAcquired ? styles.badgeCircleActive : styles.badgeCircleInactive
-                  ]}>
-                    {badge.isAcquired ? (
-                      // 🌟 획득한 배지: 추후 에셋 이미지가 준비되면 Image 컴포넌트 주석 해제 후 사용
-                      // <Image source={require(`../../assets/images/badges/${badge.id}.png`)} style={{ width: 52, height: 52 }} resizeMode="contain" />
-                      <Text style={{ fontSize: 40 }}>🏅</Text> // 임시 이모지
-                    ) : (
-                      // 미획득 상태
-                      <Text style={styles.badgeEmptyText}>미획득</Text>
-                    )}
-                  </View>
-                  
-                  <Text style={styles.badgeName}>{badge.name}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-          
-
-        </BottomSheetScrollView>
-      </BottomSheet>
-
-
-      {/* 하단 네비게이션 바 */}
-      <View pointerEvents="box-none" style={{ position: 'absolute', bottom: 0, width: '100%', zIndex: 20 }}>
+      <View style={{ position: 'absolute', bottom: 0, width: '100%', zIndex: 20 }}>
         <BottomNav />
       </View>
+
+      <BadgeDetailModal badge={selectedBadge} onClose={() => setSelectedBadge(null)} />
+      <ProfileEditModal
+        visible={editVisible}
+        nickname={nicknameInput}
+        onChangeNickname={setNicknameInput}
+        onCancel={() => setEditVisible(false)}
+        onSave={saveProfile}
+      />
+      <DeleteTagModal visible={deleteVisible} onCancel={() => setDeleteVisible(false)} onDelete={confirmDeleteTag} />
     </SafeAreaView>
   );
 }
+
+function BadgeDetailModal({ badge, onClose }: { badge: Badge | null; onClose: () => void }) {
+  if (!badge) return null;
+  return (
+    <Modal visible={Boolean(badge)} transparent={false} animationType="slide" onRequestClose={onClose}>
+      <View style={profileModalStyles.badgeDetail}>
+        <TouchableOpacity onPress={onClose} style={profileModalStyles.backTextButton} activeOpacity={0.8}>
+          <Text style={profileModalStyles.backText}>←</Text>
+        </TouchableOpacity>
+        <Text style={profileModalStyles.badgeHeader}>활동배지</Text>
+        <View style={profileModalStyles.badgeHero}>
+          {badge.image && <Image source={badge.image} style={profileModalStyles.detailBadgeImage} resizeMode="contain" />}
+        </View>
+        <Text style={profileModalStyles.badgeTheme}>{badge.theme}</Text>
+        <Text style={profileModalStyles.badgeTitle}>{badge.name}</Text>
+        <Text style={profileModalStyles.badgeDescription}>{badge.description}</Text>
+      </View>
+    </Modal>
+  );
+}
+
+function ProfileEditModal({
+  visible,
+  nickname,
+  onChangeNickname,
+  onCancel,
+  onSave,
+}: {
+  visible: boolean;
+  nickname: string;
+  onChangeNickname: (value: string) => void;
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <View style={profileModalStyles.backdrop}>
+        <View style={profileModalStyles.dialog}>
+          <Text style={profileModalStyles.dialogTitle}>내 정보 수정</Text>
+          <Text style={profileModalStyles.dialogLabel}>닉네임</Text>
+          <TextInput
+            value={nickname}
+            onChangeText={onChangeNickname}
+            style={profileModalStyles.input}
+            placeholder="닉네임을 입력하세요"
+            maxLength={12}
+          />
+          <TouchableOpacity style={profileModalStyles.primaryButton} onPress={onSave} activeOpacity={0.85}>
+            <Text style={profileModalStyles.primaryButtonText}>완료</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={profileModalStyles.secondaryButton} onPress={onCancel} activeOpacity={0.85}>
+            <Text style={profileModalStyles.secondaryButtonText}>취소</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function DeleteTagModal({ visible, onCancel, onDelete }: { visible: boolean; onCancel: () => void; onDelete: () => void }) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <View style={profileModalStyles.backdrop}>
+        <View style={profileModalStyles.dialog}>
+          <Text style={profileModalStyles.dialogTitle}>태그를 삭제하시겠습니까?</Text>
+          <Text style={profileModalStyles.dialogDesc}>현재 연결된 태그 정보가 이 기기에서 해제됩니다.</Text>
+          <TouchableOpacity style={profileModalStyles.dangerButton} onPress={onDelete} activeOpacity={0.85}>
+            <Text style={profileModalStyles.dangerButtonText}>삭제하기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={profileModalStyles.secondaryButton} onPress={onCancel} activeOpacity={0.85}>
+            <Text style={profileModalStyles.secondaryButtonText}>취소하기</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const profileModalStyles = StyleSheet.create({
+  avatarImage: {
+    width: 68,
+    height: 68,
+  },
+  badgeImage: {
+    width: 118,
+    height: 118,
+  },
+  lockedBadgeImage: {
+    opacity: 0.34,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.68)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  dialog: {
+    width: '100%',
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    padding: 22,
+  },
+  dialogTitle: {
+    color: '#000000',
+    fontSize: 20,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  dialogLabel: {
+    color: '#8A8A8A',
+    fontSize: 12,
+    fontWeight: '800',
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  dialogDesc: {
+    color: '#8A8A8A',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  input: {
+    height: 46,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    paddingHorizontal: 14,
+    color: '#000000',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  primaryButton: {
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#FFB826',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  dangerButton: {
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E26D5A',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  dangerButtonText: {
+    color: '#E26D5A',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  secondaryButton: {
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  secondaryButtonText: {
+    color: '#8A8A8A',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  badgeDetail: {
+    flex: 1,
+    backgroundColor: '#EAF9F5',
+    alignItems: 'center',
+    paddingTop: 54,
+    paddingHorizontal: 28,
+  },
+  backTextButton: {
+    position: 'absolute',
+    left: 24,
+    top: 52,
+  },
+  backText: {
+    color: '#8A8A8A',
+    fontSize: 26,
+    fontWeight: '700',
+  },
+  badgeHeader: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  badgeHero: {
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: '#FFF9E6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 72,
+    shadowColor: '#FFB826',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  detailBadgeImage: {
+    width: 165,
+    height: 165,
+  },
+  badgeTheme: {
+    color: '#1BC5CC',
+    fontSize: 13,
+    fontWeight: '900',
+    marginTop: 34,
+  },
+  badgeTitle: {
+    color: '#1BC5CC',
+    fontSize: 28,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  badgeDescription: {
+    color: '#4C4C4C',
+    fontSize: 13,
+    lineHeight: 21,
+    textAlign: 'center',
+    marginTop: 18,
+  },
+});

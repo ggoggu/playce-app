@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { CATEGORY_LIST } from '../hooks/useMainPresenter';
+import { createShadowStyle } from '../styles/theme';
 
 export default function CategoryFilter({ selectedCategory, onSelectCategory }: any) {
   return (
@@ -58,11 +59,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 3,
+    ...createShadowStyle(0, 8, 12, 0.1, 3),
   },
   tagButtonActive: {
     backgroundColor: '#FFB826',
@@ -83,11 +80,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 3,
+    ...createShadowStyle(0, 8, 12, 0.1, 3),
   },
   targetInnerCircle: {
     width: 10,

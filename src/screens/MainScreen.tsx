@@ -45,7 +45,7 @@ export default function MainScreen() {
 
       {/* 2. 상단 UI (코스가 진행 중이 아닐 때만 헤더와 필터를 보여주기) */}
       {!isCourseActive && (
-        <SafeAreaView style={styles.topOverlay} pointerEvents="box-none">
+        <SafeAreaView style={[styles.topOverlay, { pointerEvents: 'box-none' }]}>
           <Header />
           <CategoryFilter 
             selectedCategory={selectedCategory} 

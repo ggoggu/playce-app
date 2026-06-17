@@ -1,6 +1,6 @@
 // src/components/CourseCompletePopup.styles.ts
 import { StyleSheet, Dimensions } from 'react-native';
-import { colors, typography } from '../styles/theme';
+import { colors, createShadowStyle, typography } from '../styles/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -44,13 +44,8 @@ export const styles = StyleSheet.create({
     borderRadius: 96.5,
     justifyContent: 'center',
     alignItems: 'center',
-    // iOS 그림자
-    shadowColor: colors.primary, // '#FFB826'
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    // Android 그림자 (Glow 효과를 위해 elevation 사용)
-    elevation: 20, 
+    // 플랫폼별 Glow 효과
+    ...createShadowStyle(0, 0, 20, 0.8, 20, colors.primary),
   },
   badgeImage: {
     width: 80,
@@ -79,11 +74,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    ...createShadowStyle(0, 4, 8, 0.1, 4),
   },
   continueButtonText: {
     fontFamily: typography.main,
@@ -98,11 +89,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    ...createShadowStyle(0, 4, 8, 0.1, 4),
   },
   badgeBoxButtonText: {
     fontFamily: typography.main,

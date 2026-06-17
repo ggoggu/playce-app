@@ -5,14 +5,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "playceapp",
+    "scheme": [
+      "playceapp",
+      "khuround"
+    ],
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.playce.app", 
+      "bundleIdentifier": "com.playce.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "package": "com.playce.app", 
+      "package": "com.playce.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -42,7 +45,8 @@
         {
           "cameraPermission": "QR 코드를 스캔하여 태그를 연동하기 위해 카메라 접근 권한이 필요합니다."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -9,9 +9,18 @@ interface CoursePopupProps {
   title: string;
   coursePath: string;
   imageSource?: any;
+  isInProgress?: boolean;
 }
 
-export default function CoursePopup({ visible, onClose, onStart, title, coursePath, imageSource }: CoursePopupProps) {
+export default function CoursePopup({
+  visible,
+  onClose,
+  onStart,
+  title,
+  coursePath,
+  imageSource,
+  isInProgress = false,
+}: CoursePopupProps) {
   return (
     <Modal transparent={true} animationType="fade" visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -25,7 +34,9 @@ export default function CoursePopup({ visible, onClose, onStart, title, coursePa
             <Text style={styles.subTitle}>
               <Text style={styles.highlightText}>{title}</Text>를 선택하셨습니다!
             </Text>
-            <Text style={styles.mainTitle}>함께 여정을 떠나시겠습니까?</Text>
+            <Text style={styles.mainTitle}>
+              {isInProgress ? '이어서 여정을 떠나시겠습니까?' : '함께 여정을 떠나시겠습니까?'}
+            </Text>
           </View>
 
           <View style={styles.courseBox}>
@@ -35,7 +46,7 @@ export default function CoursePopup({ visible, onClose, onStart, title, coursePa
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.startButton} onPress={onStart}>
-              <Text style={styles.startButtonText}>시작하기</Text>
+              <Text style={styles.startButtonText}>{isInProgress ? '마저 관광하기' : '시작하기'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.backButton} onPress={onClose}>
               <Text style={styles.backButtonText}>뒤로가기</Text>

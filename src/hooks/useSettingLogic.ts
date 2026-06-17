@@ -4,8 +4,7 @@ import { Alert } from 'react-native';
 import { useCourse } from '../context/CourseState';
 
 export const useSettingLogic = () => {
-  // 🌟 1단계에서 제공해주신 전역 코스 상태 가져오기
-  const { cancelCourse, isCourseActive } = useCourse();
+  const { cancelCourse, hasJourneyHistory } = useCourse();
 
   // --- 화면 상태(State) 관리 ---
   const [isProximityAlertOn, setIsProximityAlertOn] = useState(true);
@@ -30,7 +29,7 @@ export const useSettingLogic = () => {
 
   // 2. 여정 초기화 기능 (실수 방지를 위한 확인창 추가)
   const handleResetCourse = () => {
-    if (!isCourseActive) {
+    if (!hasJourneyHistory) {
       Alert.alert('알림', '현재 진행 중인 여정이 없습니다.');
       return;
     }
@@ -44,7 +43,7 @@ export const useSettingLogic = () => {
           text: '초기화', 
           style: 'destructive', 
           onPress: () => {
-            cancelCourse(); // 🌟 전역 상태 초기화 함수 실행
+            cancelCourse();
             Alert.alert('완료', '여정이 안전하게 초기화되었습니다.');
           }
         }
@@ -63,6 +62,8 @@ export const useSettingLogic = () => {
     isHapticOn,
     selectedVoice,
     selectedLanguage,
+    setSelectedVoice,
+    setSelectedLanguage,
     toggleProximityAlert,
     toggleHaptic,
     handleResetCourse,

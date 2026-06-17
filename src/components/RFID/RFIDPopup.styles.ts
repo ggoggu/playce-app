@@ -1,6 +1,6 @@
 // src/components/RFIDPopup.styles.ts
 import { StyleSheet } from 'react-native';
-import { colors, typography } from '../../styles/theme'; // 기존에 만드신 theme 활용
+import { colors, createShadowStyle, typography } from '../../styles/theme'; // 기존에 만드신 theme 활용
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -54,11 +54,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 2, // Android 전용 그림자
+    ...createShadowStyle(0, 0, 10, 0.08, 2),
   },
   startButtonText: {
     fontFamily: typography.main,
