@@ -1,12 +1,12 @@
 // src/screens/AudioGuideScreen.tsx
-import React from 'react';
-import { View, Text, SafeAreaView, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useCourse } from '../context/CourseState';
-import { COURSE_DATA } from '../constants/CourseData'; // 🌟 1단계 메타데이터
-import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import React from 'react';
+import { Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import AudioPlayerSheet from '../components/AudioPlayerSheet';
 import CourseCompletePopup from '../components/CourseCompletePopup';
+import { COURSE_DATA } from '../constants/CourseData'; // 🌟 1단계 메타데이터
+import { useCourse } from '../context/CourseState';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { styles } from './AudioGuideScreen.styles';
 
 export default function AudioGuideScreen() {
@@ -47,7 +47,11 @@ export default function AudioGuideScreen() {
         <Image source={currentNodeData.images.bg} style={styles.illustBg} resizeMode="contain" />
         <Image source={require('../../assets/images/course_history/deco_cloud_1.png')} style={styles.cloud1} resizeMode="contain" />
         <Image source={require('../../assets/images/course_history/deco_cloud_2.png')} style={styles.cloud2} resizeMode="contain" />
-        <Image source={currentNodeData.images.building} style={styles.mainIllust} resizeMode="contain" />
+        <Image 
+          source={currentNodeData.images.building} 
+          style={[styles.mainIllust, currentNodeData.buildingStyle]} 
+          resizeMode="contain" 
+        />
         
         <View style={styles.titleBox}>
           <Text style={styles.titleBoxText}>{currentNodeData.placeName}</Text>
