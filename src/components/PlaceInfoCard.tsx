@@ -13,7 +13,7 @@ export default function PlaceInfoCard({ node, onClose }: PlaceInfoCardProps) {
   if (!node) return null;
 
   return (
-    <View style={styles.cardContainer} pointerEvents="box-none">
+    <View style={[styles.cardContainer, { pointerEvents: 'box-none' }]}>
       <View style={styles.card}>
         {/* 장소 고유 건물 일러스트 이미지 영역 */}
         <View style={styles.imageWrapper}>

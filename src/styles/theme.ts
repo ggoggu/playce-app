@@ -1,4 +1,4 @@
-import { ViewStyle, TextStyle } from 'react-native';
+import { Platform, ViewStyle, TextStyle } from 'react-native';
 
 // 🎨 1. 앱 공통 색상 (Colors)
 export const colors = {
@@ -20,47 +20,70 @@ export const typography = {
   main: 'Pretendard',       // 앱 기본 폰트
 };
 
+export function createShadowStyle(
+  offsetX: number,
+  offsetY: number,
+  blurRadius: number,
+  opacity: number,
+  elevation: number,
+  color = '#000000',
+): ViewStyle {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: `${offsetX}px ${offsetY}px ${blurRadius}px ${toRgba(color, opacity)}`,
+    } as ViewStyle;
+  }
+
+  return {
+    shadowColor: color,
+    shadowOffset: { width: offsetX, height: offsetY },
+    shadowOpacity: opacity,
+    shadowRadius: blurRadius,
+    elevation,
+  };
+}
+
+function textShadowStyle(offsetX: number, offsetY: number, blurRadius: number, opacity: number): TextStyle {
+  if (Platform.OS === 'web') {
+    return {
+      textShadow: `${offsetX}px ${offsetY}px ${blurRadius}px rgba(0, 0, 0, ${opacity})`,
+    } as TextStyle;
+  }
+
+  return {
+    textShadowColor: `rgba(0, 0, 0, ${opacity})`,
+    textShadowOffset: { width: offsetX, height: offsetY },
+    textShadowRadius: blurRadius,
+  };
+}
+
+function toRgba(color: string, opacity: number): string {
+  if (!color.startsWith('#') || (color.length !== 7 && color.length !== 4)) {
+    return color;
+  }
+
+  const normalized = color.length === 4
+    ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}`
+    : color;
+  const red = parseInt(normalized.slice(1, 3), 16);
+  const green = parseInt(normalized.slice(3, 5), 16);
+  const blue = parseInt(normalized.slice(5, 7), 16);
+  return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+}
+
 // ☁️ 3. 공통 그림자 스타일 (Shadows)
-// 피그마에 있는 box-shadow 및 text-shadow 수치를 React Native에 맞게 변환했습니다.
+// 피그마에 있는 box-shadow 및 text-shadow 수치를 플랫폼별 스타일로 변환했습니다.
 export const shadows = {
   // 가벼운 그림자 (카드, 진행도 바, 코스 노드 원 등) - blur: 10, opacity: 10%
-  light: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3, // Android 전용
-  } as ViewStyle,
-  card: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4,
-  },
+  light: createShadowStyle(0, 0, 10, 0.1, 3),
+  card: createShadowStyle(0, 0, 16, 0.1, 4),
   
   // 버튼 그림자 (시작하기 버튼 등) - blur: 20, opacity: 10%
-  button: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 4,
-  } as ViewStyle,
+  button: createShadowStyle(0, 0, 20, 0.1, 4),
 
   // 바텀 네비게이션 전용 깊은 그림자 - y: 12, blur: 40, opacity: 8%
-  bottomNav: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 40,
-    elevation: 10,
-  } as ViewStyle,
+  bottomNav: createShadowStyle(0, 12, 40, 0.08, 10),
 
   // PLAYCE 로고 전용 텍스트 그림자
-  textLogo: {
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  } as TextStyle,
+  textLogo: textShadowStyle(0, 0, 20, 0.2),
 };

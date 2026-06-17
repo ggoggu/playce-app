@@ -31,6 +31,14 @@ const RECOMMENDED_EVENTS: EventData[] = [
     title: '입는 존재',
     subTitle: 'Wearing Being:On the Matter of Clothing',
     image: require('../../assets/images/event/square_wearing.png'), // 🌟 이미지 연결
+    details: {
+      moodTags: ['# 감각적인', '# 의복과_몸', '# 현대미술', '# 사유하는'],
+      companionTags: ['# 혼자서_천천히', '# 전시_입문자'],
+      previewTitle: '옷이라는 가장 가까운 존재를 새롭게 바라보다.',
+      previewDesc: '입는 행위와 몸, 사회적 시선을 다루는 전시입니다. 작품을 따라가며 나를 둘러싼 취향과 정체성을 천천히 발견해 보세요.',
+      period: '2026-02-12 ~ 2027-03-01',
+      price: '성인 : 4000원 / 청소년 : 2000원 / 어린이 : 1000원',
+    },
   },
 ];
 

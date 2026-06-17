@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createShadowStyle } from '../styles/theme';
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -75,11 +76,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 2,
+    ...createShadowStyle(0, 0, 10, 0.08, 2),
     marginBottom: 12,
   },
   startButtonText: {

@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { createShadowStyle } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
 const SCAN_BOX_SIZE = 240; // 스캔 영역 가로세로 길이
@@ -83,11 +84,7 @@ export const styles = StyleSheet.create({
     paddingTop: 36,
     paddingHorizontal: 36,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 10,
+    ...createShadowStyle(0, -4, 20, 0.1, 10),
   },
   
   // PLAYCE 로고
@@ -145,5 +142,53 @@ export const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 28,
     color: '#FFFFFF',
+  },
+
+  permissionFallback: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  permissionTitle: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 20,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  permissionDescription: {
+    fontFamily: 'Pretendard',
+    fontWeight: '500',
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#CDCDCD',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  permissionManualButton: {
+    minWidth: 180,
+    minHeight: 48,
+    borderRadius: 24,
+    backgroundColor: '#1BC5CC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    marginBottom: 18,
+  },
+  permissionManualText: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 16,
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  permissionBackText: {
+    fontFamily: 'Pretendard',
+    fontWeight: '700',
+    fontSize: 15,
+    color: '#8A8A8A',
+    textAlign: 'center',
   }
 });

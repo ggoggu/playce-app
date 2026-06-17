@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { createShadowStyle } from '../styles/theme';
 
 export default function Header() {
   return (
@@ -25,11 +26,7 @@ const styles = StyleSheet.create({
     borderRadius: 26.75,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4,
+    ...createShadowStyle(0, 0, 16, 0.1, 4),
     marginBottom: 10,
   },
   logoText: {

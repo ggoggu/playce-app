@@ -64,6 +64,11 @@ export const styles = StyleSheet.create({
   },
 
   cardContentTop: { gap: 14 },
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   tag: {
     ...commonStyles.tagBase,
     width: 52,
@@ -71,6 +76,19 @@ export const styles = StyleSheet.create({
   },
   tagIcon: { width: 11.5, height: 10, backgroundColor: colors.primary, borderRadius: 2 },
   tagText: { fontSize: 10, fontWeight: '600', color: 'rgba(0, 0, 0, 0.7)' },
+  progressTag: {
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.white,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressTagText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.point,
+  },
   
   cardTextGroup: { gap: 12 },
   cardTitle: { fontSize: 24, fontWeight: '700', color: colors.white },

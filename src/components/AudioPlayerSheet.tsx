@@ -40,8 +40,7 @@ export default function AudioPlayerSheet({
         {/* 🌟 가변형 코스 순서 노드 */}
         <View style={styles.nodeContainer}>
           {nodeArray.map((num) => {
-            // 이미 완료된 코스이거나, 현재 재생 중인데 끝난(isFinished) 상태면 파란색(Active)
-            const isCompleted = completedNodes.includes(num) || (num === currentNodeIndex && isFinished);
+            const isCompleted = completedNodes.includes(num) || (num === currentNodeIndex && (isFinished || isPlaying));
             
             return (
               <View 

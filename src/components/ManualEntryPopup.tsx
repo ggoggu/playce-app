@@ -57,12 +57,12 @@ export default function ManualEntryPopup({ visible, onClose }: ManualEntryPopupP
                     placeholder="코드를 입력하세요"
                     placeholderTextColor="#CDCDCD"
                     autoCapitalize="characters" // 고유 코드가 주로 대문자일 경우를 대비
-                    maxLength={20} // 코드 최대 길이 제한 (필요에 따라 수정)
+                    maxLength={128} // claim URL까지 입력할 수 있도록 여유 있게 제한
                     returnKeyType="done"
                     onSubmitEditing={handleSubmit} // 키보드에서 '완료'를 눌러도 제출되도록 설정
                   />
                   <Text style={styles.guideText}>
-                    고유 코드(영문/숫자)를 직접 입력하여{'\n'}여정을 시작하세요
+                    QR URL 또는 TAG 토큰을 직접 입력하여{'\n'}태그를 연결하세요
                   </Text>
                 </View>
 

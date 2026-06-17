@@ -1,14 +1,29 @@
-// src/context/CourseState.ts
-import { useState, useEffect } from 'react';
-import { COURSE_DATA, CourseThemeType } from '../constants/CourseData'; // 🌟 1단계에서 만든 데이터와 타입 임포트
+import { useEffect, useState } from 'react';
+import { COURSE_DATA, CourseNode, CourseThemeType } from '../constants/CourseData';
 
 export type CourseTheme = CourseThemeType | null;
 
-// 앱 전체에서 공유할 글로벌 변수 (진실의 원천)
+export interface CourseProgressState {
+  completedNodes: number[];
+  currentNodeIndex: number | null;
+  isRFIDDetected: boolean;
+}
+
+type CourseProgressMap = Partial<Record<CourseThemeType, CourseProgressState>>;
+
+const TOTAL_PLAYCE_NODES = Object.values(COURSE_DATA).reduce((sum, theme) => sum + theme.totalNodes, 0);
+
+const createEmptyCourseProgressState = (): CourseProgressState => ({
+  completedNodes: [],
+  currentNodeIndex: null,
+  isRFIDDetected: false,
+});
+
+const badgeKey = (themeId: CourseThemeType, nodeId: number) => `${themeId}:${nodeId}`;
+
 let globalActiveTheme: CourseTheme = null;
-let globalRFIDPlace: string | null = null;
-let globalCompletedNodes: number[] = []; 
-let globalCurrentNodeIndex: number | null = null; // 🌟 추가: 현재 사용자가 진입한 오디오 코스 번호
+let globalCourseProgressStates: CourseProgressMap = {};
+let globalCompletedBadgeKeys: string[] = [];
 
 const listeners = new Set<() => void>();
 
@@ -16,88 +31,218 @@ const notifyListeners = () => {
   listeners.forEach(listener => listener());
 };
 
+const getThemeProgressState = (
+  themeId: CourseThemeType,
+  courseProgressStates: CourseProgressMap = globalCourseProgressStates,
+): CourseProgressState => courseProgressStates[themeId] ?? createEmptyCourseProgressState();
+
+const getNextCourseNode = (
+  themeId: CourseThemeType | null,
+  courseProgressStates: CourseProgressMap = globalCourseProgressStates,
+): CourseNode | null => {
+  if (!themeId) {
+    return null;
+  }
+
+  const themeData = COURSE_DATA[themeId];
+  const progressState = getThemeProgressState(themeId, courseProgressStates);
+
+  return (
+    themeData.nodes.find(node => node.id === progressState.currentNodeIndex && !progressState.completedNodes.includes(node.id)) ??
+    themeData.nodes.find(node => !progressState.completedNodes.includes(node.id)) ??
+    null
+  );
+};
+
+const uniqueBadgeKeys = (badgeKeys: string[], nextKey: string): string[] =>
+  badgeKeys.includes(nextKey) ? badgeKeys : [...badgeKeys, nextKey];
+
+const cloneCourseProgressStates = (courseProgressStates: CourseProgressMap): CourseProgressMap =>
+  Object.entries(courseProgressStates).reduce<CourseProgressMap>((acc, [themeId, progressState]) => {
+    if (!progressState) {
+      return acc;
+    }
+
+    acc[themeId as CourseThemeType] = {
+      completedNodes: [...progressState.completedNodes],
+      currentNodeIndex: progressState.currentNodeIndex,
+      isRFIDDetected: progressState.isRFIDDetected,
+    };
+    return acc;
+  }, {});
+
 export const useCourse = () => {
   const [activeTheme, setActiveTheme] = useState<CourseTheme>(globalActiveTheme);
-  const [rfidPlace, setRfidPlace] = useState<string | null>(globalRFIDPlace);
-  const [completedNodes, setCompletedNodes] = useState<number[]>(globalCompletedNodes);
-  const [currentNodeIndex, setCurrentNodeIndex] = useState<number | null>(globalCurrentNodeIndex); // 🌟 추가
+  const [courseProgressStates, setCourseProgressStates] = useState<CourseProgressMap>(cloneCourseProgressStates(globalCourseProgressStates));
+  const [completedBadgeKeys, setCompletedBadgeKeys] = useState<string[]>([...globalCompletedBadgeKeys]);
 
   useEffect(() => {
     const listener = () => {
       setActiveTheme(globalActiveTheme);
-      setRfidPlace(globalRFIDPlace);
-      setCompletedNodes([...globalCompletedNodes]);
-      setCurrentNodeIndex(globalCurrentNodeIndex); // 🌟 추가
+      setCourseProgressStates(cloneCourseProgressStates(globalCourseProgressStates));
+      setCompletedBadgeKeys([...globalCompletedBadgeKeys]);
     };
+
     listeners.add(listener);
     return () => {
       listeners.delete(listener);
     };
   }, []);
 
-  // 코스 여정 시작
+  const activeCourseState = activeTheme ? getThemeProgressState(activeTheme, courseProgressStates) : createEmptyCourseProgressState();
+  const activeNode = getNextCourseNode(activeTheme, courseProgressStates);
+  const completedNodes = activeCourseState.completedNodes;
+  const currentNodeIndex = activeCourseState.currentNodeIndex;
+  const currentThemeData = activeTheme ? COURSE_DATA[activeTheme] : null;
+  const progressPercent = currentThemeData
+    ? Math.round((completedNodes.length / Math.max(currentThemeData.totalNodes, 1)) * 100)
+    : 0;
+  const overallProgressPercent = Math.round(
+    (completedBadgeKeys.length / Math.max(TOTAL_PLAYCE_NODES, 1)) * 100,
+  );
+  const hasJourneyHistory = completedBadgeKeys.length > 0 || Object.keys(courseProgressStates).length > 0;
+
   const startCourse = (theme: Exclude<CourseTheme, null>) => {
+    if (!globalCourseProgressStates[theme]) {
+      globalCourseProgressStates = {
+        ...globalCourseProgressStates,
+        [theme]: createEmptyCourseProgressState(),
+      };
+    }
     globalActiveTheme = theme;
-    globalCompletedNodes = []; 
-    globalCurrentNodeIndex = null;
     notifyListeners();
   };
 
-  // 코스 여정 완전히 취소 (초기화)
+  const openCourseSelection = () => {
+    if (globalActiveTheme) {
+      const currentState = getThemeProgressState(globalActiveTheme);
+      globalCourseProgressStates = {
+        ...globalCourseProgressStates,
+        [globalActiveTheme]: {
+          ...currentState,
+          isRFIDDetected: false,
+        },
+      };
+    }
+    globalActiveTheme = null;
+    notifyListeners();
+  };
+
   const cancelCourse = () => {
     globalActiveTheme = null;
-    globalRFIDPlace = null;
-    globalCompletedNodes = [];
-    globalCurrentNodeIndex = null;
+    globalCourseProgressStates = {};
+    globalCompletedBadgeKeys = [];
     notifyListeners();
   };
 
-  // RFID 태그 인식되었을 때
-  const triggerRFID = (placeName: string) => {
-    globalRFIDPlace = placeName;
-    notifyListeners();
-  };
-
-  // RFID 팝업 닫기
-  const closeRFID = () => {
-    globalRFIDPlace = null;
-    notifyListeners();
-  };
-
-  // 🌟 추가: 현재 재생/진입할 노드 번호를 전역에 설정하는 함수
-  const setCurrentNode = (nodeIndex: number | null) => {
-    globalCurrentNodeIndex = nodeIndex;
-    notifyListeners();
-  };
-
-  // 특정 코스 완료 처리
-  const completeNode = (nodeIndex: number) => {
-    if (!globalCompletedNodes.includes(nodeIndex)) {
-      globalCompletedNodes.push(nodeIndex);
-      notifyListeners();
+  const triggerRFID = () => {
+    if (!globalActiveTheme) {
+      return;
     }
+
+    const nextNode = getNextCourseNode(globalActiveTheme);
+    if (!nextNode) {
+      globalActiveTheme = null;
+      notifyListeners();
+      return;
+    }
+
+    const currentState = getThemeProgressState(globalActiveTheme);
+    globalCourseProgressStates = {
+      ...globalCourseProgressStates,
+      [globalActiveTheme]: {
+        ...currentState,
+        currentNodeIndex: nextNode.id,
+        isRFIDDetected: true,
+      },
+    };
+    notifyListeners();
   };
 
-  // 🌟 [핵심 변경] 선택한 테마의 실제 totalNodes를 기반으로 진행률(%)을 동적 계산합니다.
-  const currentThemeData = activeTheme ? COURSE_DATA[activeTheme] : null;
-  const totalNodes = currentThemeData ? currentThemeData.totalNodes : 1; // 0 나누기 방지 기본값 1
-  const progressPercent = currentThemeData 
-    ? Math.round((completedNodes.length / totalNodes) * 100) 
-    : 0;
+  const closeRFID = () => {
+    if (!globalActiveTheme) {
+      return;
+    }
 
-  return { 
+    const currentState = getThemeProgressState(globalActiveTheme);
+    globalCourseProgressStates = {
+      ...globalCourseProgressStates,
+      [globalActiveTheme]: {
+        ...currentState,
+        isRFIDDetected: false,
+      },
+    };
+    notifyListeners();
+  };
+
+  const setCurrentNode = (nodeIndex: number | null) => {
+    if (!globalActiveTheme) {
+      return;
+    }
+
+    const currentState = getThemeProgressState(globalActiveTheme);
+    globalCourseProgressStates = {
+      ...globalCourseProgressStates,
+      [globalActiveTheme]: {
+        ...currentState,
+        currentNodeIndex: nodeIndex,
+      },
+    };
+    notifyListeners();
+  };
+
+  const completeNode = (nodeIndex: number) => {
+    if (!globalActiveTheme) {
+      return;
+    }
+
+    const themeId = globalActiveTheme;
+    const currentState = getThemeProgressState(themeId);
+    const nextCompletedNodes = currentState.completedNodes.includes(nodeIndex)
+      ? currentState.completedNodes
+      : [...currentState.completedNodes, nodeIndex];
+
+    globalCompletedBadgeKeys = uniqueBadgeKeys(globalCompletedBadgeKeys, badgeKey(themeId, nodeIndex));
+
+    const nextNode = COURSE_DATA[themeId].nodes.find(node => !nextCompletedNodes.includes(node.id)) ?? null;
+
+    if (nextNode) {
+      globalCourseProgressStates = {
+        ...globalCourseProgressStates,
+        [themeId]: {
+          completedNodes: nextCompletedNodes,
+          currentNodeIndex: nextNode.id,
+          isRFIDDetected: false,
+        },
+      };
+    } else {
+      const { [themeId]: _removed, ...remainingThemes } = globalCourseProgressStates;
+      globalCourseProgressStates = remainingThemes;
+      globalActiveTheme = null;
+    }
+
+    notifyListeners();
+  };
+
+  return {
     isCourseActive: activeTheme !== null,
     activeTheme,
-    rfidPlace,
-    isRFIDDetected: globalRFIDPlace !== null,
+    activeNode,
+    courseProgressStates,
+    completedBadgeKeys,
     completedNodes,
-    currentNodeIndex, // 🌟 현재 보고 있는 노드 번호 반환
-    progressPercent,  // 🌟 가변형으로 계산된 진행률(%) 반환
+    currentNodeIndex,
+    isRFIDDetected: activeCourseState.isRFIDDetected,
+    rfidPlace: activeCourseState.isRFIDDetected ? activeNode?.placeName ?? null : null,
+    progressPercent,
+    overallProgressPercent,
+    hasJourneyHistory,
     triggerRFID,
     closeRFID,
-    startCourse, 
+    startCourse,
     cancelCourse,
-    setCurrentNode,   // 🌟 노드 설정 함수 반환
-    completeNode
+    openCourseSelection,
+    setCurrentNode,
+    completeNode,
   };
 };

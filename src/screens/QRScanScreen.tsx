@@ -15,11 +15,32 @@ export default function QRScanScreen() {
   // 권한 대기 중이거나 거부된 경우의 화면 처리
   if (!hasPermission) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: '#FFFFFF', marginBottom: 20 }}>카메라 접근 권한이 필요합니다.</Text>
-        <TouchableOpacity onPress={handleGoBack} activeOpacity={0.7}>
-          <Text style={{ color: '#1BC5CC', fontSize: 16, fontWeight: 'bold' }}>뒤로 가기</Text>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack} activeOpacity={0.7}>
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
+
+        <View style={styles.permissionFallback}>
+          <Text style={styles.permissionTitle}>카메라 접근 권한이 필요합니다.</Text>
+          <Text style={styles.permissionDescription}>
+            권한이 없거나 웹 환경에서는 QR URL 또는 TAG 토큰을 직접 입력할 수 있어요.
+          </Text>
+          <TouchableOpacity 
+            style={styles.permissionManualButton} 
+            activeOpacity={0.7} 
+            onPress={() => setManualPopupVisible(true)}
+          >
+            <Text style={styles.permissionManualText}>직접 입력하기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleGoBack} activeOpacity={0.7}>
+            <Text style={styles.permissionBackText}>뒤로 가기</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ManualEntryPopup 
+          visible={isManualPopupVisible} 
+          onClose={() => setManualPopupVisible(false)} 
+        />
       </View>
     );
   }
@@ -42,7 +63,7 @@ export default function QRScanScreen() {
       />
 
       {/* 3. 스캔 영역 오버레이 (터치 무시) */}
-      <View style={styles.overlay} pointerEvents="none">
+      <View style={[styles.overlay, { pointerEvents: 'none' }]}>
         <View style={styles.scanBox}>
           {/* 상단 모서리 */}
           <View style={styles.cornerRow}>

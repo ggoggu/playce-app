@@ -1,16 +1,23 @@
 // src/hooks/useAudioPlayer.ts
 import { useState, useRef, useCallback } from 'react';
-import { Audio } from 'expo-av';
 import { useFocusEffect } from 'expo-router'; // 🌟 라우터 포커스 훅 추가
 
+type SoundHandle = {
+  pauseAsync: () => Promise<unknown>;
+  playAsync: () => Promise<unknown>;
+  replayAsync: () => Promise<unknown>;
+  stopAsync: () => Promise<unknown>;
+  unloadAsync: () => Promise<unknown>;
+};
+
 export function useAudioPlayer(audioSource: any) {
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [sound, setSound] = useState<SoundHandle | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<SoundHandle | null>(null);
 
   const onPlaybackStatusUpdate = (status: any) => {
     if (status.isLoaded) {
@@ -32,6 +39,7 @@ export function useAudioPlayer(audioSource: any) {
 
       async function loadAudio() {
         try {
+          const { Audio } = await import('expo-av');
           // 아이폰 무음 모드에서도 소리가 나도록 안전장치 추가
           await Audio.setAudioModeAsync({
             playsInSilentModeIOS: true,

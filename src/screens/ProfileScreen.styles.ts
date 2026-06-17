@@ -96,6 +96,28 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.point, // #1BC5CC
   },
+  tagPendingText: {
+    fontFamily: typography.main,
+    fontWeight: '600',
+    fontSize: 11,
+    color: colors.grayDark,
+    maxWidth: 112,
+  },
+  tagMetaText: {
+    fontFamily: typography.main,
+    fontWeight: '500',
+    fontSize: 11,
+    color: colors.grayDark,
+    marginTop: -14,
+    marginBottom: 16,
+  },
+  tagErrorText: {
+    fontFamily: typography.main,
+    fontWeight: '500',
+    fontSize: 11,
+    color: '#C7382E',
+    marginBottom: 12,
+  },
   
   // --- 버튼 ---
   qrButton: {
@@ -130,6 +152,19 @@ export const styles = StyleSheet.create({
   sheetContainer: {
     // 하단 바(BottomNav) 위로 시트가 올라오도록 zIndex 설정
     zIndex: 10, 
+  },
+  webSheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '45%',
+    minHeight: 300,
+    backgroundColor: '#FFB826',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    overflow: 'hidden',
+    ...shadows.card,
   },
   sheetIndicator: {
     // 피그마: tabler:arrow-up 아이콘을 대체하는 세련된 핸들 바
@@ -197,11 +232,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center', // 세로 중앙 정렬
     paddingHorizontal: 4, // 피그마 기준 내부 여백 (left: 6, top: 4 보정)
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 2,
+    ...shadows.light,
   },
   progressBarFill: {
     height: 20,

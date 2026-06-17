@@ -59,12 +59,36 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     gap: 10,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
   mainTitle: {
     fontFamily: typography.main,
     fontWeight: '800',
     fontSize: 24,
     lineHeight: 32,
     color: colors.point,
+    flex: 1,
+  },
+  courseSelectButton: {
+    minWidth: 96,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    borderWidth: 1,
+    borderColor: colors.grayLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+  },
+  courseSelectButtonText: {
+    fontFamily: typography.main,
+    fontWeight: '700',
+    fontSize: 11,
+    color: colors.grayDark,
   },
 
   // --- 진행도 바 ---

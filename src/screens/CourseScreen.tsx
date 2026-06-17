@@ -4,45 +4,59 @@ import { useCourse } from '../context/CourseState';
 import CourseProgressScreen from './CourseProgressScreen';
 import BottomNav from '../components/BottomNav';
 import CoursePopup from '../components/CoursePopup';
-import { commonStyles } from '../styles/common';
 import { styles } from './CourseScreen.styles'; // 🌟 분리한 스타일 불러오기
 
 const CARD_WIDTH = 294;
 const CARD_GAP = 28;
 
+const COURSES = {
+  history: {
+    id: 'history',
+    title: '역사테마',
+    desc: '행궁동에 얽힌 역사 이야기들과 함께 문화재를 구경해요!',
+    path: '화성행궁 - 화령전 - 서장대\n서북각루 - 화서문 & 서북공심돈',
+    bgImage: require('../../assets/images/course_bg_1.png'),
+    mainImage: require('../../assets/images/theme_history_main.png'),
+    popupImage: require('../../assets/images/theme_history_popup.png'),
+  },
+  movie: {
+    id: 'movie',
+    title: '영화 & 드라마',
+    desc: '행궁동에서 영화 & 드라마 속 명장면을 찾아보세요!',
+    path: '이태원 클라쓰 - 선재 업고 튀어 - 이상한 변호사 우영우\n그 해 우리는 - 전우치 - 클래식',
+    bgImage: require('../../assets/images/course_bg_1.png'),
+    mainImage: require('../../assets/images/course_movie/node_6_classic.png'),
+    popupImage: require('../../assets/images/course_movie/node_6_classic.png'),
+  },
+} as const;
+
+type CoursePopupData = {
+  title: string;
+  path: string;
+  image: any;
+  themeId: '' | keyof typeof COURSES;
+  isInProgress: boolean;
+};
+
 export default function CourseScreen() {
-  const { isCourseActive, startCourse } = useCourse();
+  const { isCourseActive, courseProgressStates, startCourse } = useCourse();
   const [isPopupVisible, setPopupVisible] = useState(false);
-  const [popupData, setPopupData] = useState({ title: '', path: '', image: null, themeId: '' });
+  const [popupData, setPopupData] = useState<CoursePopupData>({
+    title: '',
+    path: '',
+    image: null,
+    themeId: '',
+    isInProgress: false,
+  });
 
-  const COURSES = {
-    history: {
-      id: 'history',
-      title: '역사테마',
-      desc: '행궁동에 얽힌 역사 이야기들과 함께 문화재를 구경해요!',
-      path: '화성행궁 - 화령전 - 서장대\n서북각루 - 화서문 & 서북공심돈',
-      bgImage: require('../../assets/images/course_bg_1.png'),
-      mainImage: require('../../assets/images/theme_history_main.png'),
-      popupImage: require('../../assets/images/theme_history_popup.png'),
-    },
-    movie: {
-      id: 'movie',
-      title: '영화 & 드라마',
-      desc: '행궁동에서 영화 & 드라마 속 명장면을 찾아보세요!',
-      path: '행궁동 벽화마을 - 드라마 촬영지 1\n명장면 카페거리 - 영화 촬영지 2',
-      bgImage: require('../../assets/images/course_bg_1.png'), 
-      mainImage: require('../../assets/images/theme_history_main.png'), 
-      popupImage: require('../../assets/images/theme_history_popup.png'),
-    }
-  };
-
-  const openPopup = (themeId: 'history' | 'movie') => {
+  const openPopup = (themeId: keyof typeof COURSES) => {
     const selected = COURSES[themeId];
     setPopupData({
       title: selected.title,
       path: selected.path,
       image: selected.popupImage,
-      themeId: selected.id
+      themeId: selected.id,
+      isInProgress: Boolean(courseProgressStates[themeId]),
     });
     setPopupVisible(true);
   };
@@ -50,7 +64,7 @@ export default function CourseScreen() {
   const handleStartCourse = () => {
     setPopupVisible(false);
     if (popupData.themeId) {
-      startCourse(popupData.themeId as 'history' | 'movie');
+      startCourse(popupData.themeId);
     }
   };
 
@@ -86,8 +100,18 @@ export default function CourseScreen() {
           snapToInterval={CARD_WIDTH + CARD_GAP}
           decelerationRate="fast"
         >
-          <CardItem course={COURSES.history} courseNum="1" onPress={() => openPopup('history')} />
-          <CardItem course={COURSES.movie} courseNum="2" onPress={() => openPopup('movie')} />
+          <CardItem
+            course={COURSES.history}
+            courseNum="1"
+            isInProgress={Boolean(courseProgressStates.history)}
+            onPress={() => openPopup('history')}
+          />
+          <CardItem
+            course={COURSES.movie}
+            courseNum="2"
+            isInProgress={Boolean(courseProgressStates.movie)}
+            onPress={() => openPopup('movie')}
+          />
         </ScrollView>
       </View>
 
@@ -100,19 +124,27 @@ export default function CourseScreen() {
         title={popupData.title}
         coursePath={popupData.path}
         imageSource={popupData.image}
+        isInProgress={popupData.isInProgress}
       />
     </SafeAreaView>
   );
 }
 
-const CardItem = ({ course, courseNum, onPress }: any) => (
+const CardItem = ({ course, courseNum, isInProgress, onPress }: any) => (
   <View style={styles.cardWrapper}>
     <ImageBackground source={course.bgImage} style={styles.cardBg} imageStyle={{ borderRadius: 20 }}>
       <Image source={course.mainImage} style={styles.cardIllustration} resizeMode="contain" />
       <View style={styles.cardContentTop}>
-        <View style={styles.tag}>
-          <View style={styles.tagIcon} />
-          <Text style={styles.tagText}>코스{courseNum}</Text>
+        <View style={styles.tagRow}>
+          <View style={styles.tag}>
+            <View style={styles.tagIcon} />
+            <Text style={styles.tagText}>코스{courseNum}</Text>
+          </View>
+          {isInProgress && (
+            <View style={styles.progressTag}>
+              <Text style={styles.progressTagText}>진행 중</Text>
+            </View>
+          )}
         </View>
         <View style={styles.cardTextGroup}>
           <Text style={styles.cardTitle}>{course.title}</Text>
@@ -120,7 +152,7 @@ const CardItem = ({ course, courseNum, onPress }: any) => (
         </View>
       </View>
       <TouchableOpacity style={styles.startButton} onPress={onPress} activeOpacity={0.9}>
-        <Text style={styles.startButtonText}>시작하기</Text>
+        <Text style={styles.startButtonText}>{isInProgress ? '이어보기' : '시작하기'}</Text>
       </TouchableOpacity>
     </ImageBackground>
   </View>

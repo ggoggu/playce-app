@@ -6,6 +6,8 @@ import { styles } from './CourseCompletePopup.styles';
 interface CourseCompletePopupProps {
   visible: boolean;
   titleText: string; // 🌟 외부에서 팝업 제목을 주입받도록 추가
+  badgeImage?: any;
+  isThemeMastered?: boolean;
   onContinue: () => void;
   onGoToBadgeBox?: () => void;
 }
@@ -13,6 +15,8 @@ interface CourseCompletePopupProps {
 export default function CourseCompletePopup({ 
   visible, 
   titleText, // 🌟 프롭스 받기
+  badgeImage,
+  isThemeMastered = false,
   onContinue, 
   onGoToBadgeBox 
 }: CourseCompletePopupProps) {
@@ -27,11 +31,15 @@ export default function CourseCompletePopup({
             
             <View style={styles.badgeSection}>
               <View style={styles.badgeCircle}>
-                <Image 
-                  source={require('../../assets/images/course_history/badge_history_1.png')} 
-                  style={styles.badgeImage} 
-                  resizeMode="contain" 
-                />
+                {badgeImage ? (
+                  <Image 
+                    source={badgeImage}
+                    style={styles.badgeImage} 
+                    resizeMode="contain" 
+                  />
+                ) : (
+                  <Text style={styles.badgePlaceholderText}>NEW</Text>
+                )}
               </View>
               <Text style={styles.badgeTitle}>배지를 받았어요!</Text>
             </View>
@@ -39,7 +47,7 @@ export default function CourseCompletePopup({
 
           <View style={styles.buttonGroup}>
             <TouchableOpacity style={styles.continueButton} onPress={onContinue} activeOpacity={0.8}>
-              <Text style={styles.continueButtonText}>마저 관광하기</Text>
+              <Text style={styles.continueButtonText}>{isThemeMastered ? '코스 완료하기' : '마저 관광하기'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.badgeBoxButton} onPress={onGoToBadgeBox} activeOpacity={0.8}>
