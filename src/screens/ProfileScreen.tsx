@@ -253,8 +253,8 @@ function DeleteTagModal({ visible, onCancel, onDelete }: { visible: boolean; onC
 
 const profileModalStyles = StyleSheet.create({
   avatarImage: {
-    width: 68,
-    height: 68,
+    width: 58,
+    height: 58,
   },
   badgeImage: {
     width: 118,
