@@ -75,7 +75,7 @@ export const COURSE_DATA: Record<CourseThemeType, ThemeCourseData> = {
           building: require('../../assets/images/course_history/node_2_hwaryeong.png'), // 🌟 고유 이미지 적용
           marker: require('../../assets/images/course_history/node_2_hwaryeong_maker.png'),
         },
-        buildingStyle: { width: 358, height: 193, marginTop: 40 },
+        buildingStyle: { width: 644, height: 347, marginTop: 40 },
         badgeImage: require('../../assets/images/badges/badge_hwaryeongjeon.png'),
         mapPosition: { left: 245, top: 626 },
       },
@@ -107,7 +107,7 @@ export const COURSE_DATA: Record<CourseThemeType, ThemeCourseData> = {
           building: require('../../assets/images/course_history/node_4_seobuk.png'), // 🌟 고유 이미지 적용
           marker: require('../../assets/images/course_history/node_4_seobuk_maker.png'),
         },
-        buildingStyle: { width: 358, height: 193, marginTop: 40 },
+        buildingStyle: { width: 644, height: 347, marginTop: 40 },
         badgeImage: require('../../assets/images/badges/badge_seobukgakru.png'),
         mapPosition: { left: 90, top: 289 },
       },
@@ -123,7 +123,7 @@ export const COURSE_DATA: Record<CourseThemeType, ThemeCourseData> = {
           building: require('../../assets/images/course_history/node_5_hwaseomun.png'), // 🌟 고유 이미지 적용
           marker: require('../../assets/images/course_history/node_5_hwaseomun_maker.png'),
         },
-        buildingStyle: { width: 358, height: 193, marginTop: 40 },
+        buildingStyle: { width: 644, height: 347, marginTop: 40 },
         badgeImage: require('../../assets/images/badges/badge_hwaseomun.png'),
         mapPosition: { left: 249, top: 289 },
       },
