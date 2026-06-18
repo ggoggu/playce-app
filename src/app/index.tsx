@@ -1,9 +1,9 @@
 // src/app/index.tsx
+import { Redirect } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import MainScreen from '../screens/MainScreen';
-import OnboardingScreen from '../screens/OnboardingScreen';
 
 const ONBOARDING_COMPLETE_KEY = 'playce.onboardingComplete';
 const NICKNAME_KEY = 'playce.nickname';
@@ -43,8 +43,15 @@ export default function Index() {
     return <LoadingSplash />;
   }
 
+  
+
+  
+
   if (!onboardingComplete) {
+    return <Redirect href={"/onboarding" as any} />;
+    /*
     return (
+      
       <OnboardingScreen
         onComplete={(nextNickname) => {
           const nickname = nextNickname.trim() || DEFAULT_NICKNAME;
@@ -54,7 +61,9 @@ export default function Index() {
           void SecureStore.setItemAsync(ONBOARDING_COMPLETE_KEY, 'true');
         }}
       />
+      
     );
+    */
   }
 
   return <MainScreen />;

@@ -1,6 +1,6 @@
+import { usePathname, useRouter } from 'expo-router'; // 🌟 페이지 이동 마법사들 불러오기
 import React from 'react';
-import { Image, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter, usePathname } from 'expo-router'; // 🌟 페이지 이동 마법사들 불러오기
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { shadows } from '../styles/theme';
 
 // 🌟 탭 이름과 2단계에서 만든 주소(URL)를 짝지어 줍니다.
@@ -16,7 +16,7 @@ export default function BottomNav() {
   const router = useRouter(); // 페이지 이동을 담당
   const pathname = usePathname(); // 현재 내가 있는 주소를 확인
 
-  if (pathname === '/audio-guide' || pathname === '/qr-scan') {
+  if (pathname === '/audio-guide' || pathname === '/qr-scan' || pathname === '/onboarding') {
     return null;
   }
 
